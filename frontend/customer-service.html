@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Service - Legend of Calicdan</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-content">
+                <h2 class="sidebar-label">Navigation</h2>
+                <nav class="sidebar-nav">
+                    <a href="index.html" class="nav-item">
+                        <i data-lucide="home"></i>
+                        Home
+                    </a>
+                    <a href="chat.html" class="nav-item">
+                        <i data-lucide="message-square"></i>
+                        Chat
+                    </a>
+                    <a href="history.html" class="nav-item">
+                        <i data-lucide="history"></i>
+                        History
+                    </a>
+                    <a href="settings.html" class="nav-item">
+                        <i data-lucide="settings"></i>
+                        Settings
+                    </a>
+                    <a href="customer-service.html" class="nav-item active">
+                        <i data-lucide="headphones"></i>
+                        Customer Service
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <div class="logo">
+                        <i data-lucide="message-square"></i>
+                    </div>
+                    <h1 class="header-title">Legend of Calicdan</h1>
+                </div>
+                
+                <div class="header-right">
+                    <div class="user-menu">
+                        <div class="user-avatar">U</div>
+                        <i data-lucide="chevron-down"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Top Navigation -->
+            <nav class="top-nav">
+                <a href="index.html" class="tab-item">Landing (Desktop)</a>
+                <a href="chat.html" class="tab-item">Chat (Desktop)</a>
+                <a href="history.html" class="tab-item">History</a>
+                <a href="settings.html" class="tab-item">Settings</a>
+                <a href="customer-service.html" class="tab-item active">Customer Service</a>
+            </nav>
+
+            <!-- Customer Service Page Content -->
+            <main class="customer-service-page">
+                <div class="container">
+                    <header class="page-header">
+                        <div class="header-content">
+                            <h1 class="page-title">Customer Service</h1>
+                            <p class="page-subtitle">Legend of Calicdan</p>
+                        </div>
+                        <div class="page-actions">
+                            <button class="btn btn-outline">
+                                <i data-lucide="book"></i>
+                                Help Center
+                            </button>
+                            <button class="btn btn-primary">
+                                <i data-lucide="send"></i>
+                                Submit Ticket
+                            </button>
+                        </div>
+                    </header>
+
+                    <div class="service-layout">
+                        <!-- Main Form -->
+                        <div class="service-main">
+                            <div class="form-card">
+                                <h2 class="form-title">Describe your issue</h2>
+
+                                <form id="supportForm" class="support-form">
+                                    <div class="form-group">
+                                        <label for="subject" class="form-label">Brief subject</label>
+                                        <input type="text" id="subject" class="form-input" placeholder="Briefly describe your issue" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="description" class="form-label">Description</label>
+                                        <textarea id="description" class="form-textarea" placeholder="Add details to help us troubleshoot..." required></textarea>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Attachments</label>
+                                        <div class="file-upload" id="fileUpload">
+                                            <input type="file" id="fileInput" multiple style="display: none;">
+                                            <div class="upload-area">
+                                                <i data-lucide="paperclip"></i>
+                                                <span>Click to upload files or drag and drop</span>
+                                            </div>
+                                            <div class="file-list" id="fileList"></div>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary btn-full">
+                                        <i data-lucide="send"></i>
+                                        Send
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Sidebar -->
+                        <div class="service-sidebar">
+                            <!-- Quick Links -->
+                            <div class="sidebar-card">
+                                <h3 class="sidebar-title">Quick links</h3>
+                                <div class="link-list">
+                                    <button class="link-item">
+                                        <div class="link-icon">
+                                            <i data-lucide="book"></i>
+                                        </div>
+                                        <div class="link-content">
+                                            <p class="link-title">Getting started</p>
+                                            <p class="link-description">Guide</p>
+                                        </div>
+                                    </button>
+                                    
+                                    <button class="link-item">
+                                        <div class="link-icon">
+                                            <i data-lucide="palette"></i>
+                                        </div>
+                                        <div class="link-content">
+                                            <p class="link-title">Light & Dark mode</p>
+                                            <p class="link-description">How-to</p>
+                                        </div>
+                                    </button>
+                                    
+                                    <button class="link-item">
+                                        <div class="link-icon">
+                                            <i data-lucide="shield"></i>
+                                        </div>
+                                        <div class="link-content">
+                                            <p class="link-title">Privacy controls</p>
+                                            <p class="link-description">Policy</p>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Contact Options -->
+                            <div class="sidebar-card">
+                                <h3 class="sidebar-title">Contact options</h3>
+                                <div class="contact-list">
+                                    <button class="contact-item">
+                                        <div class="contact-icon">
+                                            <i data-lucide="message-circle"></i>
+                                        </div>
+                                        <div class="contact-content">
+                                            <p class="contact-title">Live Chat</p>
+                                            <p class="contact-description">Get instant help from our support team</p>
+                                        </div>
+                                    </button>
+                                    
+                                    <button class="contact-item">
+                                        <div class="contact-icon">
+                                            <i data-lucide="mail"></i>
+                                        </div>
+                                        <div class="contact-content">
+                                            <p class="contact-title">Email</p>
+                                            <p class="contact-description">Send us a detailed message</p>
+                                        </div>
+                                    </button>
+                                    
+                                    <button class="contact-item">
+                                        <div class="contact-icon">
+                                            <i data-lucide="phone"></i>
+                                        </div>
+                                        <div class="contact-content">
+                                            <p class="contact-title">Request Call</p>
+                                            <p class="contact-description">Schedule a call with our team</p>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="scripts/main.js"></script>
+    <script src="scripts/customer-service.js"></script>
+</body>
+</html>

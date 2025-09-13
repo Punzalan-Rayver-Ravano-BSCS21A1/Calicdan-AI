@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History - Legend of Calicdan</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-content">
+                <h2 class="sidebar-label">Navigation</h2>
+                <nav class="sidebar-nav">
+                    <a href="index.html" class="nav-item">
+                        <i data-lucide="home"></i>
+                        Home
+                    </a>
+                    <a href="chat.html" class="nav-item">
+                        <i data-lucide="message-square"></i>
+                        Chat
+                    </a>
+                    <a href="history.html" class="nav-item active">
+                        <i data-lucide="history"></i>
+                        History
+                    </a>
+                    <a href="settings.html" class="nav-item">
+                        <i data-lucide="settings"></i>
+                        Settings
+                    </a>
+                    <a href="customer-service.html" class="nav-item">
+                        <i data-lucide="headphones"></i>
+                        Customer Service
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <div class="logo">
+                        <i data-lucide="message-square"></i>
+                    </div>
+                    <h1 class="header-title">Legend of Calicdan</h1>
+                </div>
+                
+                <div class="header-right">
+                    <div class="user-menu">
+                        <div class="user-avatar">U</div>
+                        <i data-lucide="chevron-down"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Top Navigation -->
+            <nav class="top-nav">
+                <a href="index.html" class="tab-item">Landing (Desktop)</a>
+                <a href="chat.html" class="tab-item">Chat (Desktop)</a>
+                <a href="history.html" class="tab-item active">History</a>
+                <a href="settings.html" class="tab-item">Settings</a>
+                <a href="customer-service.html" class="tab-item">Customer Service</a>
+            </nav>
+
+            <!-- History Page Content -->
+            <main class="history-page">
+                <div class="container">
+                    <header class="page-header">
+                        <h1 class="page-title">Chat History</h1>
+                    </header>
+
+                    <!-- Search and Filters -->
+                    <div class="search-filters">
+                        <div class="search-input">
+                            <i data-lucide="search" class="search-icon"></i>
+                            <input type="text" id="searchInput" placeholder="Search conversations...">
+                        </div>
+                        
+                        <div class="filter-buttons">
+                            <div class="dropdown">
+                                <button class="btn btn-outline dropdown-trigger" id="dateFilter">
+                                    <i data-lucide="calendar"></i>
+                                    Last 30 days
+                                </button>
+                                <div class="dropdown-menu" id="dateFilterMenu">
+                                    <button class="dropdown-item" data-value="7">Last 7 days</button>
+                                    <button class="dropdown-item" data-value="30">Last 30 days</button>
+                                    <button class="dropdown-item" data-value="90">Last 3 months</button>
+                                    <button class="dropdown-item" data-value="all">All time</button>
+                                </div>
+                            </div>
+
+                            <div class="dropdown">
+                                <button class="btn btn-outline dropdown-trigger" id="tagFilter">
+                                    <i data-lucide="tag"></i>
+                                    All tags
+                                </button>
+                                <div class="dropdown-menu" id="tagFilterMenu">
+                                    <button class="dropdown-item" data-value="all">All tags</button>
+                                    <button class="dropdown-item" data-value="business">Business</button>
+                                    <button class="dropdown-item" data-value="development">Development</button>
+                                    <button class="dropdown-item" data-value="personal">Personal</button>
+                                    <button class="dropdown-item" data-value="planning">Planning</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Sessions -->
+                    <div class="chat-sessions" id="chatSessions">
+                        <div class="session-card" data-tags="planning,business">
+                            <div class="session-content">
+                                <div class="session-header">
+                                    <h3 class="session-title">Quarterly Planning Recap</h3>
+                                    <div class="session-tags">
+                                        <span class="tag">planning</span>
+                                        <span class="tag">business</span>
+                                    </div>
+                                </div>
+                                
+                                <p class="session-preview">Key initiatives for Q4 include...</p>
+                                
+                                <div class="session-meta">
+                                    <i data-lucide="clock"></i>
+                                    <span>Yesterday</span>
+                                </div>
+                            </div>
+                            
+                            <div class="session-actions">
+                                <button class="btn btn-outline btn-sm">
+                                    <i data-lucide="archive"></i>
+                                </button>
+                                <div class="dropdown">
+                                    <button class="btn btn-outline btn-sm dropdown-trigger">
+                                        <i data-lucide="more-horizontal"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <button class="dropdown-item">Rename</button>
+                                        <button class="dropdown-item">Duplicate</button>
+                                        <button class="dropdown-item">Export</button>
+                                        <button class="dropdown-item text-destructive">
+                                            <i data-lucide="trash-2"></i>
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="session-card" data-tags="development,bugs">
+                            <div class="session-content">
+                                <div class="session-header">
+                                    <h3 class="session-title">Bug Triage Notes</h3>
+                                    <div class="session-tags">
+                                        <span class="tag">development</span>
+                                        <span class="tag">bugs</span>
+                                    </div>
+                                </div>
+                                
+                                <p class="session-preview">Top issues ranked by impact...</p>
+                                
+                                <div class="session-meta">
+                                    <i data-lucide="clock"></i>
+                                    <span>2 days ago</span>
+                                </div>
+                            </div>
+                            
+                            <div class="session-actions">
+                                <button class="btn btn-outline btn-sm">
+                                    <i data-lucide="archive"></i>
+                                </button>
+                                <div class="dropdown">
+                                    <button class="btn btn-outline btn-sm dropdown-trigger">
+                                        <i data-lucide="more-horizontal"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <button class="dropdown-item">Rename</button>
+                                        <button class="dropdown-item">Duplicate</button>
+                                        <button class="dropdown-item">Export</button>
+                                        <button class="dropdown-item text-destructive">
+                                            <i data-lucide="trash-2"></i>
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="session-card" data-tags="travel,personal">
+                            <div class="session-content">
+                                <div class="session-header">
+                                    <h3 class="session-title">Travel Itinerary</h3>
+                                    <div class="session-tags">
+                                        <span class="tag">travel</span>
+                                        <span class="tag">personal</span>
+                                    </div>
+                                </div>
+                                
+                                <p class="session-preview">Flights on Tuesday at 9am...</p>
+                                
+                                <div class="session-meta">
+                                    <i data-lucide="clock"></i>
+                                    <span>Last week</span>
+                                </div>
+                            </div>
+                            
+                            <div class="session-actions">
+                                <button class="btn btn-outline btn-sm">
+                                    <i data-lucide="archive"></i>
+                                </button>
+                                <div class="dropdown">
+                                    <button class="btn btn-outline btn-sm dropdown-trigger">
+                                        <i data-lucide="more-horizontal"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <button class="dropdown-item">Rename</button>
+                                        <button class="dropdown-item">Duplicate</button>
+                                        <button class="dropdown-item">Export</button>
+                                        <button class="dropdown-item text-destructive">
+                                            <i data-lucide="trash-2"></i>
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- No Results -->
+                    <div class="no-results hidden" id="noResults">
+                        <h3>No conversations found</h3>
+                        <p>Try adjusting your search terms or filters.</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="scripts/main.js"></script>
+    <script src="scripts/history.js"></script>
+</body>
+</html>

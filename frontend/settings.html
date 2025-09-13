@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Legend of Calicdan</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-content">
+                <h2 class="sidebar-label">Navigation</h2>
+                <nav class="sidebar-nav">
+                    <a href="index.html" class="nav-item">
+                        <i data-lucide="home"></i>
+                        Home
+                    </a>
+                    <a href="chat.html" class="nav-item">
+                        <i data-lucide="message-square"></i>
+                        Chat
+                    </a>
+                    <a href="history.html" class="nav-item">
+                        <i data-lucide="history"></i>
+                        History
+                    </a>
+                    <a href="settings.html" class="nav-item active">
+                        <i data-lucide="settings"></i>
+                        Settings
+                    </a>
+                    <a href="customer-service.html" class="nav-item">
+                        <i data-lucide="headphones"></i>
+                        Customer Service
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <div class="logo">
+                        <i data-lucide="message-square"></i>
+                    </div>
+                    <h1 class="header-title">Legend of Calicdan</h1>
+                </div>
+                
+                <div class="header-right">
+                    <div class="user-menu">
+                        <div class="user-avatar">U</div>
+                        <i data-lucide="chevron-down"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Top Navigation -->
+            <nav class="top-nav">
+                <a href="index.html" class="tab-item">Landing (Desktop)</a>
+                <a href="chat.html" class="tab-item">Chat (Desktop)</a>
+                <a href="history.html" class="tab-item">History</a>
+                <a href="settings.html" class="tab-item active">Settings</a>
+                <a href="customer-service.html" class="tab-item">Customer Service</a>
+            </nav>
+
+            <!-- Settings Page Content -->
+            <main class="settings-page">
+                <div class="container">
+                    <header class="page-header">
+                        <h1 class="page-title">Settings</h1>
+                        <div class="page-actions">
+                            <button class="btn btn-outline">Reset</button>
+                            <button class="btn btn-primary">Save changes</button>
+                        </div>
+                    </header>
+
+                    <div class="settings-layout">
+                        <!-- Sidebar -->
+                        <aside class="settings-sidebar">
+                            <nav class="settings-nav">
+                                <button class="settings-nav-item active" data-category="appearance">
+                                    <i data-lucide="palette"></i>
+                                    Appearance
+                                    <i data-lucide="chevron-right"></i>
+                                </button>
+                                <button class="settings-nav-item" data-category="account">
+                                    <i data-lucide="user"></i>
+                                    Account
+                                    <i data-lucide="chevron-right"></i>
+                                </button>
+                                <button class="settings-nav-item" data-category="privacy">
+                                    <i data-lucide="shield"></i>
+                                    Privacy
+                                    <i data-lucide="chevron-right"></i>
+                                </button>
+                                <button class="settings-nav-item" data-category="notifications">
+                                    <i data-lucide="bell"></i>
+                                    Notifications
+                                    <i data-lucide="chevron-right"></i>
+                                </button>
+                                <button class="settings-nav-item" data-category="api">
+                                    <i data-lucide="key"></i>
+                                    API & Keys
+                                    <i data-lucide="chevron-right"></i>
+                                </button>
+                            </nav>
+                        </aside>
+
+                        <!-- Main Content -->
+                        <div class="settings-content">
+                            <!-- Appearance Settings -->
+                            <div class="settings-panel active" id="appearance">
+                                <div class="settings-section">
+                                    <h2 class="section-title">Theme</h2>
+                                    
+                                    <div class="setting-item">
+                                        <div class="setting-label">
+                                            <label>Appearance</label>
+                                            <p>Switch between Light and Dark modes for the entire app.</p>
+                                        </div>
+                                        <select class="form-select" id="themeSelect">
+                                            <option value="light">Light</option>
+                                            <option value="dark">Dark</option>
+                                            <option value="system">System</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="setting-item">
+                                        <div class="setting-label">
+                                            <label>High Contrast</label>
+                                            <p>Increase contrast for improved readability.</p>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="highContrast">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="settings-section">
+                                    <h2 class="section-title">Chat Preferences</h2>
+                                    
+                                    <div class="setting-item">
+                                        <div class="setting-label">
+                                            <label>Message Density</label>
+                                            <p>Choose how compact messages appear in chat.</p>
+                                        </div>
+                                        <select class="form-select" id="messageDensity">
+                                            <option value="compact">Compact</option>
+                                            <option value="comfortable" selected>Comfortable</option>
+                                            <option value="spacious">Spacious</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="setting-item">
+                                        <div class="setting-label">
+                                            <label>Show Timestamps</label>
+                                            <p>Display time next to each message in conversations.</p>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="showTimestamps" checked>
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Privacy Settings -->
+                            <div class="settings-panel" id="privacy">
+                                <div class="settings-section">
+                                    <h2 class="section-title">Data & Privacy</h2>
+                                    
+                                    <div class="privacy-card">
+                                        <div class="privacy-item">
+                                            <p class="privacy-title">Clear Chat History</p>
+                                            <button class="btn btn-destructive btn-sm">
+                                                <i data-lucide="trash-2"></i>
+                                                Clear
+                                            </button>
+                                        </div>
+                                        <p class="privacy-description">
+                                            Permanently remove all your past chats from this device.
+                                        </p>
+                                    </div>
+
+                                    <div class="privacy-card">
+                                        <div class="privacy-item">
+                                            <p class="privacy-title">Export Data</p>
+                                            <button class="btn btn-outline btn-sm">
+                                                <i data-lucide="download"></i>
+                                                Export
+                                            </button>
+                                        </div>
+                                        <p class="privacy-description">
+                                            Download your messages as a JSON file.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Notifications Settings -->
+                            <div class="settings-panel" id="notifications">
+                                <div class="settings-section">
+                                    <h2 class="section-title">Notifications</h2>
+                                    
+                                    <div class="setting-item">
+                                        <div class="setting-label">
+                                            <label>Email Notifications</label>
+                                            <p>Receive email updates about important events.</p>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="emailNotifications" checked>
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+
+                                    <div class="setting-item">
+                                        <div class="setting-label">
+                                            <label>Push Notifications</label>
+                                            <p>Get push notifications on your mobile device.</p>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="pushNotifications" checked>
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+
+                                    <div class="setting-item">
+                                        <div class="setting-label">
+                                            <label>Desktop Notifications</label>
+                                            <p>Show notifications on your desktop when the app is open.</p>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="desktopNotifications">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Account Settings -->
+                            <div class="settings-panel" id="account">
+                                <div class="settings-section">
+                                    <h2 class="section-title">Account Information</h2>
+                                    <p class="section-description">
+                                        Manage your account settings and preferences.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- API Settings -->
+                            <div class="settings-panel" id="api">
+                                <div class="settings-section">
+                                    <h2 class="section-title">API & Keys</h2>
+                                    <p class="section-description">
+                                        Manage API keys and integrations.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- About Section -->
+                            <div class="about-section">
+                                <h3 class="about-title">About</h3>
+                                <div class="about-info">
+                                    <p><strong>Legend of Calicdan</strong></p>
+                                    <p>Version 1.2.0 • Stable</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="scripts/main.js"></script>
+    <script src="scripts/settings.js"></script>
+</body>
+</html>
