@@ -1,152 +1,180 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Legend of Calicdan - AI Chat Assistant</title>
-    <meta name="description" content="A clean, fast, and reliable AI chatbot interface for Legend of Calicdan. Ask questions, brainstorm ideas, and get work done faster with our intelligent AI assistant.">
-    <meta name="author" content="Legend of Calicdan">
-    
-    <meta property="og:title" content="Legend of Calicdan - AI Chat Assistant">
-    <meta property="og:description" content="A clean, fast, and reliable AI chatbot interface for Legend of Calicdan. Ask questions, brainstorm ideas, and get work done faster with our intelligent AI assistant.">
-    <meta property="og:type" content="website">
-    
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/theme.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- No-flash theme bootstrap (apply theme + background BEFORE first paint) -->
+  <meta name="color-scheme" content="light dark">
+  <script>
+  (function () {
+    try {
+      var raw = localStorage.getItem('calicdan-settings') || '{}';
+      var cfg = JSON.parse(raw);
+      var choice = (cfg.appearance && cfg.appearance.theme) || 'light'; // 'light' | 'dark' | 'system'
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var resolved = (choice === 'system') ? (prefersDark ? 'dark' : 'light') : choice;
+
+      // Apply theme immediately
+      document.documentElement.setAttribute('data-theme', resolved);
+
+      // Inline BG to prevent white flash
+      var bg = (resolved === 'dark') ? 'hsl(225, 28%, 7%)' : '#ffffff';
+      var style = document.createElement('style');
+      style.textContent = 'html,body{background:'+ bg +';}';
+      document.head.appendChild(style);
+    } catch (e) {}
+  })();
+  </script>
+
+  <title>Legend of Calicdan - AI Chat Assistant</title>
+  <meta name="description" content="A clean, fast, and reliable AI chatbot interface for Legend of Calicdan. Ask questions, brainstorm ideas, and get work done faster with our intelligent AI assistant.">
+  <meta name="author" content="Legend of Calicdan">
+
+  <meta property="og:title" content="Legend of Calicdan - AI Chat Assistant">
+  <meta property="og:description" content="A clean, fast, and reliable AI chatbot interface for Legend of Calicdan. Ask questions, brainstorm ideas, and get work done faster with our intelligent AI assistant.">
+  <meta property="og:type" content="website">
+
+  <!-- CSS (main first, then theme overrides, then transitions) -->
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/theme.css">
+  <link rel="stylesheet" href="styles/transitions.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.css">
 </head>
 <body>
-    <div class="app-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-content">
-                <h2 class="sidebar-label">Navigation</h2>
-                <nav class="sidebar-nav">
-                    <a href="index.html" class="nav-item active">
-                        <i data-lucide="home"></i>
-                        Home
-                    </a>
-                    <a href="chat.html" class="nav-item">
-                        <i data-lucide="message-square"></i>
-                        Chat
-                    </a>
-                    <a href="history.html" class="nav-item">
-                        <i data-lucide="history"></i>
-                        History
-                    </a>
-                    <a href="settings.html" class="nav-item">
-                        <i data-lucide="settings"></i>
-                        Settings
-                    </a>
-                    <a href="customer-service.html" class="nav-item">
-                        <i data-lucide="headphones"></i>
-                        Customer Service
-                    </a>
-                </nav>
-            </div>
-        </aside>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-content">
+        <h2 class="sidebar-label">Navigation</h2>
+        <nav class="sidebar-nav">
+          <a href="index.html" class="nav-item active">
+            <i data-lucide="home"></i>
+            Home
+          </a>
+          <a href="chat.html" class="nav-item">
+            <i data-lucide="message-square"></i>
+            Chat
+          </a>
+          <a href="history.html" class="nav-item">
+            <i data-lucide="history"></i>
+            History
+          </a>
+          <a href="settings.html" class="nav-item">
+            <i data-lucide="settings"></i>
+            Settings
+          </a>
+          <a href="customer-service.html" class="nav-item">
+            <i data-lucide="headphones"></i>
+            Customer Service
+          </a>
+        </nav>
+      </div>
+    </aside>
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Header -->
-            <header class="header">
-                <div class="header-left">
-                    <div class="logo">
-                        <i data-lucide="message-square"></i>
-                    </div>
-                    <h1 class="header-title">Legend of Calicdan</h1>
-                </div>
-                
-                <div class="header-right">
-                    <div class="user-menu">
-                        <div class="user-avatar">U</div>
-                        <i data-lucide="chevron-down"></i>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Top Navigation -->
-            <nav class="top-nav">
-                <a href="index.html" class="tab-item active">Landing (Desktop)</a>
-                <a href="chat.html" class="tab-item">Chat (Desktop)</a>
-                <a href="history.html" class="tab-item">History</a>
-                <a href="settings.html" class="tab-item">Settings</a>
-                <a href="customer-service.html" class="tab-item">Customer Service</a>
-            </nav>
-
-            <!-- Landing Page Content -->
-            <main class="landing-page">
-                <div class="container">
-                    <!-- Hero Section -->
-                    <section class="hero">
-                        <div class="hero-content">
-                            <h1 class="hero-title">Meet your AI Chat Assistant</h1>
-                            <p class="hero-description">
-                                A clean, fast, and reliable chatbot interface inspired by modern tools. 
-                                Ask questions, brainstorm ideas, and get work done faster.
-                            </p>
-                            
-                            <div class="hero-buttons">
-                                <button class="btn btn-primary" onclick="window.location.href='chat.html'">
-                                    Get Started
-                                    <i data-lucide="arrow-right"></i>
-                                </button>
-                                <button class="btn btn-outline">Learn More</button>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Features Section -->
-                    <section class="features">
-                        <h2 class="features-title">Why Choose Our AI Assistant?</h2>
-                        <div class="features-grid">
-                            <div class="feature-card">
-                                <div class="feature-icon">
-                                    <i data-lucide="sparkles"></i>
-                                </div>
-                                <h3 class="feature-title">AI-Powered Conversations</h3>
-                                <p class="feature-description">
-                                    Get intelligent responses and assistance for any task or question.
-                                </p>
-                            </div>
-                            
-                            <div class="feature-card">
-                                <div class="feature-icon">
-                                    <i data-lucide="zap"></i>
-                                </div>
-                                <h3 class="feature-title">Lightning Fast</h3>
-                                <p class="feature-description">
-                                    Experience instant responses with our optimized chat interface.
-                                </p>
-                            </div>
-                            
-                            <div class="feature-card">
-                                <div class="feature-icon">
-                                    <i data-lucide="shield"></i>
-                                </div>
-                                <h3 class="feature-title">Secure & Private</h3>
-                                <p class="feature-description">
-                                    Your conversations are protected with enterprise-grade security.
-                                </p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Product Preview -->
-                    <section class="product-preview">
-                        <div class="preview-card">
-                            <h3 class="preview-title">Product Preview Area</h3>
-                            <p class="preview-description">
-                                Experience the power of AI-driven conversations with our intuitive interface.
-                            </p>
-                        </div>
-                    </section>
-                </div>
-            </main>
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-left">
+          <div class="logo">
+            <i data-lucide="message-square"></i>
+          </div>
+          <h1 class="header-title">Legend of Calicdan</h1>
         </div>
-    </div>
 
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <script src="scripts/main.js"></script>
+        <div class="header-right">
+          <div class="user-menu">
+            <div class="user-avatar">U</div>
+            <i data-lucide="chevron-down"></i>
+          </div>
+        </div>
+      </header>
+
+      <!-- Top Navigation -->
+      <nav class="top-nav">
+        <a href="index.html" class="tab-item active">Landing (Desktop)</a>
+        <a href="chat.html" class="tab-item">Chat (Desktop)</a>
+        <a href="history.html" class="tab-item">History</a>
+        <a href="settings.html" class="tab-item">Settings</a>
+        <a href="customer-service.html" class="tab-item">Customer Service</a>
+      </nav>
+
+      <!-- Landing Page Content -->
+      <main class="landing-page">
+        <div class="container">
+          <!-- Hero Section -->
+          <section class="hero">
+            <div class="hero-content">
+              <h1 class="hero-title">Meet your AI Chat Assistant</h1>
+              <p class="hero-description">
+                A clean, fast, and reliable chatbot interface inspired by modern tools. 
+                Ask questions, brainstorm ideas, and get work done faster.
+              </p>
+
+              <div class="hero-buttons">
+                <!-- Use an anchor so spa-nav can intercept for smooth soft nav -->
+                <a class="btn btn-primary" href="chat.html">
+                  Get Started
+                  <i data-lucide="arrow-right"></i>
+                </a>
+                <button class="btn btn-outline">Learn More</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Features Section -->
+          <section class="features">
+            <h2 class="features-title">Why Choose Our AI Assistant?</h2>
+            <div class="features-grid">
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <i data-lucide="sparkles"></i>
+                </div>
+                <h3 class="feature-title">AI-Powered Conversations</h3>
+                <p class="feature-description">
+                  Get intelligent responses and assistance for any task or question.
+                </p>
+              </div>
+
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <i data-lucide="zap"></i>
+                </div>
+                <h3 class="feature-title">Lightning Fast</h3>
+                <p class="feature-description">
+                  Experience instant responses with our optimized chat interface.
+                </p>
+              </div>
+
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <i data-lucide="shield"></i>
+                </div>
+                <h3 class="feature-title">Secure & Private</h3>
+                <p class="feature-description">
+                  Your conversations are protected with enterprise-grade security.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Product Preview -->
+          <section class="product-preview">
+            <div class="preview-card">
+              <h3 class="preview-title">Product Preview Area</h3>
+              <p class="preview-description">
+                Experience the power of AI-driven conversations with our intuitive interface.
+              </p>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="scripts/main.js"></script>
+  <script src="scripts/spa-nav.js"></script>
 </body>
 </html>

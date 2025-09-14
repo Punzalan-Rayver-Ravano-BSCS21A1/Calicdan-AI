@@ -1,0 +1,57 @@
+/* styles/transitions.css */
+
+/* -------- Fallback (non-VT browsers) -------- */
+:root {
+  --page-tx-ms: 280ms;
+  --page-ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app-container {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--page-tx-ms) var(--page-ease),
+    transform var(--page-tx-ms) var(--page-ease);
+  backface-visibility: hidden;
+  will-change: opacity, transform;
+}
+
+/* Enter/leave (fallback) */
+html.page-enter .app-container { opacity: 0; transform: translateY(8px); }
+html.page-leave .app-container { opacity: 0; transform: translateY(-8px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .app-container { transition: none !important; }
+  html.page-enter .app-container,
+  html.page-leave .app-container { transform: none !important; }
+}
+
+/* -------- View Transitions (VT) version) -------- */
+/* Instead of animating the whole document (root), animate just the shell */
+.app-container { view-transition-name: page; }
+
+/* Slide-in/out keyframes for the container */
+@keyframes vt-slide-in {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes vt-slide-out {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(-12px); }
+}
+
+/* Bind VT animations to the container snapshots */
+::view-transition-old(page) {
+  animation: vt-slide-out var(--page-tx-ms) var(--page-ease);
+}
+::view-transition-new(page) {
+  animation: vt-slide-in var(--page-tx-ms) var(--page-ease);
+}
+
+/* Always keep background from your CSS variables to avoid any black flash */
+html, body { background: var(--background); }
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(page),
+  ::view-transition-new(page) { animation: none !important; }
+}
