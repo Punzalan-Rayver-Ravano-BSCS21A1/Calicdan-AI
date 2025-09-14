@@ -1,4 +1,4 @@
-let messages = [
+let messages = JSON.parse(localStorage.getItem("chatHistory")) || [
     {
         id: '1',
         content: "Hi! I'm your AI assistant. How can I help you today?",
@@ -12,8 +12,8 @@ let isTyping = false;
 // Path to your AI logo/avatar
 const AI_AVATAR = "public/CalicdanLogo.png"; // <-- make sure this file exists
 
-// Determine backend URL automatically
-const BACKEND_URL = `http://127.0.0.1:8000/chat`; // Always point to FastAPI
+// Backend URL
+const BACKEND_URL = `http://127.0.0.1:8000/chat`;
 
 document.addEventListener('DOMContentLoaded', initializeChat);
 
@@ -21,6 +21,8 @@ function initializeChat() {
     const messageInput = document.getElementById('messageInput');
     const sendButton = document.getElementById('sendButton');
     const actionCards = document.querySelectorAll('.action-card');
+    const clearButton = document.getElementById("clearChat");
+    const newChatButton = document.getElementById("newChat"); // ✅ New Chat button hook
 
     sendButton.addEventListener('click', handleSendMessage);
 
@@ -46,8 +48,45 @@ function initializeChat() {
         });
     });
 
+    if (clearButton) {
+        clearButton.addEventListener("click", clearChat); // ✅ now uses clean function
+    }
+
+    if (newChatButton) {
+        newChatButton.addEventListener("click", newChat); // ✅ attach new chat
+    }
+
     renderMessages();
     sendButton.disabled = true;
+}
+
+// ✅ Function to start a NEW chat session
+function newChat() {
+    messages = [
+        {
+            id: '1',
+            content: "👋 New chat started! How can I assist you?",
+            sender: 'assistant',
+            timestamp: new Date()
+        }
+    ];
+    saveMessages();
+    renderMessages();
+}
+
+// ✅ Function to clear chat
+function clearChat() {
+    localStorage.removeItem("chatHistory");
+    messages = [
+        {
+            id: '1',
+            content: "Chat cleared! Start fresh.",
+            sender: 'assistant',
+            timestamp: new Date()
+        }
+    ];
+    saveMessages();
+    renderMessages();
 }
 
 async function handleSendMessage() {
@@ -62,6 +101,7 @@ async function handleSendMessage() {
         timestamp: new Date()
     };
     messages.push(userMessage);
+    saveMessages();
     messageInput.value = '';
     document.getElementById('sendButton').disabled = true;
 
@@ -90,6 +130,7 @@ async function handleSendMessage() {
         };
 
         messages.push(aiMessage);
+        saveMessages();
         renderMessages();
 
     } catch (error) {
@@ -101,6 +142,7 @@ async function handleSendMessage() {
             timestamp: new Date()
         };
         messages.push(errorMessage);
+        saveMessages();
         renderMessages();
         console.error("Chat error:", error);
     }
@@ -111,7 +153,6 @@ function renderMessages() {
     chatMessages.innerHTML = messages.map(message => {
         const isUser = message.sender === 'user';
 
-        // Show user initial OR AI logo
         const avatarHtml = isUser
             ? `<div class="message-avatar">U</div>`
             : `<div class="message-avatar"><img src="${AI_AVATAR}" alt="Calicdan AI" /></div>`;
@@ -124,6 +165,10 @@ function renderMessages() {
         `;
     }).join('');
     scrollToBottom();
+}
+
+function saveMessages() {
+    localStorage.setItem("chatHistory", JSON.stringify(messages));
 }
 
 function showTypingIndicator() {

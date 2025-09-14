@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
-    <html lang="en" data-theme="light"></html>
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -78,17 +77,18 @@
                         <span class="status-badge">Draft</span>
                     </div>
                     <div class="chat-actions">
-                        <button class="btn btn-outline btn-sm">
+                        <!-- ✅ Added IDs for JS hooks -->
+                        <button class="btn btn-outline btn-sm" id="newChat">
                             <i data-lucide="plus"></i>
                             New Chat
                         </button>
-                        <button class="btn btn-outline btn-sm">
-                            <i data-lucide="share"></i>
-                            Share
-                        </button>
-                        <button class="btn btn-outline btn-sm">
+                        <button class="btn btn-outline btn-sm" id="clearChat">
                             <i data-lucide="trash-2"></i>
                             Clear
+                        </button>
+                        <button class="btn btn-outline btn-sm" id="clearChat">
+                            <i data-lucide="share"></i>
+                            Share
                         </button>
                     </div>
                 </div>
@@ -129,7 +129,6 @@
                 <!-- Chat Messages -->
                 <div class="chat-messages" id="chatMessages">
                     <div class="message assistant-message">
-                        <!-- changed: avatar uses image -->
                         <div class="message-avatar">
                             <img src="public/CalicdanLogo.png" alt="Calicdan AI" />
                         </div>
@@ -142,7 +141,6 @@
                 <!-- Typing Indicator -->
                 <div class="typing-indicator hidden" id="typingIndicator">
                     <div class="message assistant-message">
-                        <!-- changed: avatar uses image -->
                         <div class="message-avatar">
                             <img src="public/CalicdanLogo.png" alt="Calicdan AI" />
                         </div>
