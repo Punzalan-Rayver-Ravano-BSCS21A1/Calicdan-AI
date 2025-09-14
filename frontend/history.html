@@ -40,8 +40,22 @@
 
         <!-- Main Content -->
         <div class="main-content">
-            <!-- Reusable Header (injects here) -->
-            <div id="header"></div>
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <div class="logo">
+                        <i data-lucide="message-square"></i>
+                    </div>
+                    <h1 class="header-title">Legend of Calicdan</h1>
+                </div>
+                
+                <div class="header-right">
+                    <div class="user-menu">
+                        <div class="user-avatar">U</div>
+                        <i data-lucide="chevron-down"></i>
+                    </div>
+                </div>
+            </header>
 
             <!-- Top Navigation -->
             <nav class="top-nav">
@@ -226,50 +240,8 @@
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="scripts/main.js"></script>
     <script src="scripts/history.js"></script>
-    <script>
-  (function loadHeader() {
-    const target = document.getElementById('header');
-
-    // If opened directly from disk, fetch is blocked. Inject inline header instead.
-    if (location.protocol === 'file:') {
-      target.innerHTML = `
-<header class="header">
-  <div class="header-left">
-    <div class="logo">
-      <img src="public/CalicdanLogo.png" alt="Calicdan AI Logo" class="site-logo">
-    </div>
-    <h1 class="header-title">Legend of Calicdan</h1>
-  </div>
-  <div class="header-right">
-    <div class="user-menu">
-      <div class="user-avatar">U</div>
-      <i data-lucide="chevron-down"></i>
-    </div>
-  </div>
-</header>`;
-      if (typeof lucide !== 'undefined') lucide.createIcons();
-      return;
-    }
-
-    // Normal path when served over http://localhost
-    fetch('header.html', { cache: 'no-store' })
-      .then(res => {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.text();
-      })
-      .then(html => {
-        target.innerHTML = html;
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-      })
-      .catch(err => {
-        console.error('Header load failed:', err);
-        target.innerHTML = '<div style="padding:8px;color:#b91c1c;">Could not load header.html</div>';
-      });
-  })();
-</script>
 </body>
 </html>

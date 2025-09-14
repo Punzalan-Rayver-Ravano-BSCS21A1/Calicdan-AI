@@ -177,51 +177,16 @@ body {
     height: 1rem;
 }
 
-/* Header layout */
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
-}
-
-/* Left side: logo + title */
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;            /* space between logo and title */
-}
-
-/* Logo image */
-.logo { display: flex; align-items: center; }
-.site-logo {
-  height: 28px;         /* tweak 24–36px to taste */
-  width: auto;
-  display: block;
-  border-radius: 6px;   /* optional */
-}
-
-/* Title — keep on one line and vertically centered */
 .header-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  line-height: 1;       /* keeps it aligned with the logo height */
-  white-space: nowrap;  /* prevents wrapping (“Legend of Calicdan”) */
-  margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--foreground);
 }
 
-/* Right side (avatar/menu) */
-.header-right { display: flex; align-items: center; gap: 8px; }
-.user-menu { display: flex; align-items: center; gap: 6px; }
-.user-avatar {
-  width: 28px; height: 28px; border-radius: 50%;
-  display: grid; place-items: center;
-  background: var(--accent); color: var(--accent-foreground);
-  font-weight: 600; font-size: 0.9rem;
+.header-right {
+    display: flex;
+    align-items: center;
 }
-
 
 .user-menu {
     display: flex;
