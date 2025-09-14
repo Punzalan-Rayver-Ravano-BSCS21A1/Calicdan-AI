@@ -230,5 +230,48 @@ window.AppUtils = {
         if (window.AppUtils?.showNotification) window.AppUtils.showNotification('Contrast updated', 'success');
       });
     }
+/* ===== PAGE TRANSITIONS: smooth, with View Transitions API + fallback ===== */
+(function () {
+  const DURATION = 280;
+
+  // Enter animation (fallback class approach)
+  document.addEventListener('DOMContentLoaded', () => {
+    document.documentElement.classList.add('page-enter');
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      document.documentElement.classList.remove('page-enter');
+    }));
+  });
+
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a');
+    if (!a) return;
+
+    // Ignore modifiers / external / hash / JS links
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const href = a.getAttribute('href');
+    if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+    if (/^https?:\/\//i.test(href)) return;          // external
+    if (!/\.html(?:$|[?#])/i.test(href)) return;      // only .html
+
+    e.preventDefault();
+
+    // Prefer View Transitions API if supported (smoother, no flicker)
+    const nav = () => { window.location.href = href; };
+
+    if ('startViewTransition' in document) {
+      // Cross-document view transition (Chrome) – buttery smooth
+      // Note: needs to be served over http(s), not file://
+      document.startViewTransition(nav);
+      return;
+    }
+
+    // Fallback: old fade-out before nav
+    document.documentElement.classList.add('page-leave');
+    setTimeout(nav, DURATION);
+  });
+})();
+
+
+
   });
 })();

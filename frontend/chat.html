@@ -3,9 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <!-- No-flash theme bootstrap (apply theme + background BEFORE first paint) -->
+  <meta name="color-scheme" content="light dark">
+  <script>
+  (function () {
+    try {
+      var raw = localStorage.getItem('calicdan-settings') || '{}';
+      var cfg = JSON.parse(raw);
+      var choice = (cfg.appearance && cfg.appearance.theme) || 'light'; // 'light' | 'dark' | 'system'
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var resolved = (choice === 'system') ? (prefersDark ? 'dark' : 'light') : choice;
+
+      // Apply theme immediately
+      document.documentElement.setAttribute('data-theme', resolved);
+
+      // Inline BG to prevent white flash
+      var bg = (resolved === 'dark') ? 'hsl(225, 28%, 7%)' : '#ffffff';
+      var style = document.createElement('style');
+      style.textContent = 'html,body{background:'+ bg +';}';
+      document.head.appendChild(style);
+    } catch (e) {}
+  })();
+  </script>
     <title>Chat - Legend of Calicdan</title>
     <link rel="stylesheet" href="styles/theme.css">
     <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/transitions.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.css">
 </head>
 <body>
@@ -181,5 +204,6 @@
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="scripts/main.js"></script>
     <script src="scripts/chat.js"></script>
+    <script src="scripts/spa-nav.js"></script>
 </body>
 </html>
