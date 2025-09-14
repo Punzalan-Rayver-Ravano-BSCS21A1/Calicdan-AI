@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+    <html lang="en" data-theme="light"></html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat - Legend of Calicdan</title>
+    <link rel="stylesheet" href="styles/theme.css">
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.css">
 </head>
@@ -127,7 +129,10 @@
                 <!-- Chat Messages -->
                 <div class="chat-messages" id="chatMessages">
                     <div class="message assistant-message">
-                        <div class="message-avatar">AI</div>
+                        <!-- changed: avatar uses image -->
+                        <div class="message-avatar">
+                            <img src="public/CalicdanLogo.png" alt="Calicdan AI" />
+                        </div>
                         <div class="message-content">
                             <p>Hi! I'm your AI assistant. How can I help you today?</p>
                         </div>
@@ -137,7 +142,10 @@
                 <!-- Typing Indicator -->
                 <div class="typing-indicator hidden" id="typingIndicator">
                     <div class="message assistant-message">
-                        <div class="message-avatar">AI</div>
+                        <!-- changed: avatar uses image -->
+                        <div class="message-avatar">
+                            <img src="public/CalicdanLogo.png" alt="Calicdan AI" />
+                        </div>
                         <div class="message-content">
                             <div class="typing-dots">
                                 <div class="dot"></div>

@@ -162,3 +162,73 @@ window.AppUtils = {
     showNotification,
     closeAllDropdowns
 };
+
+/* ===== THEME: global bootstrap & settings wiring (additive) ===== */
+(function () {
+  const LS_KEY = 'calicdan-settings';
+
+  const readSettings = () => {
+    try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); }
+    catch { return {}; }
+  };
+  const writeSettings = (obj) => {
+    localStorage.setItem(LS_KEY, JSON.stringify(obj));
+  };
+
+  const prefersDark = () =>
+    window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+  // Resolve 'system' to concrete theme
+  const resolveTheme = (choice) => (choice === 'system'
+    ? (prefersDark() ? 'dark' : 'light')
+    : (choice || 'light'));
+
+  // Apply to <html>
+  const applyThemeAttrs = (choice, highContrast = false) => {
+    const resolved = resolveTheme(choice);
+    document.documentElement.setAttribute('data-theme', resolved);
+    document.documentElement.classList.toggle('high-contrast', !!highContrast);
+  };
+
+  // 1) Apply immediately on load (for all pages)
+  const saved = readSettings();
+  const choice = saved?.appearance?.theme || 'light';          // 'light' | 'dark' | 'system'
+  const highContrast = !!saved?.appearance?.highContrast;
+  applyThemeAttrs(choice, highContrast);
+
+  // 2) If 'system', live-update on OS changes
+  if (choice === 'system' && window.matchMedia) {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = () => applyThemeAttrs('system', highContrast);
+    if (mq.addEventListener) mq.addEventListener('change', onChange);
+    else mq.addListener(onChange);
+  }
+
+  // 3) Wire Settings controls (non-invasive): only if present on page
+  document.addEventListener('DOMContentLoaded', () => {
+    const themeSelect = document.getElementById('themeSelect');       // expects 'light' | 'dark' | 'system'
+    const hcToggle    = document.getElementById('highContrast');
+
+    if (themeSelect) {
+      themeSelect.addEventListener('change', function () {
+        const settings = readSettings();
+        settings.appearance = settings.appearance || {};
+        settings.appearance.theme = this.value;
+        writeSettings(settings);
+        applyThemeAttrs(settings.appearance.theme, settings.appearance.highContrast);
+        if (window.AppUtils?.showNotification) window.AppUtils.showNotification('Theme updated', 'success');
+      });
+    }
+
+    if (hcToggle) {
+      hcToggle.addEventListener('change', function () {
+        const settings = readSettings();
+        settings.appearance = settings.appearance || {};
+        settings.appearance.highContrast = !!this.checked;
+        writeSettings(settings);
+        applyThemeAttrs(settings.appearance.theme, settings.appearance.highContrast);
+        if (window.AppUtils?.showNotification) window.AppUtils.showNotification('Contrast updated', 'success');
+      });
+    }
+  });
+})();

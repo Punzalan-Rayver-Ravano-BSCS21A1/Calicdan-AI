@@ -61,6 +61,33 @@
     /* Spacing */
     --radius: 0.5rem;
 }
+/* Dark overrides */
+html[data-theme="dark"]{
+  --background: hsl(225,28%,7%);
+  --foreground: hsl(210,20%,92%);
+  --card: hsl(223,35%,10%);
+  --card-foreground: hsl(210,20%,92%);
+  --muted: hsl(223,28%,14%);
+  --muted-foreground: hsl(215,15%,70%);
+  --accent: hsl(167,35%,18%);
+  --accent-foreground: hsl(166,68%,70%);
+  --border: hsl(220,20%,24%);
+  --input: hsl(220,20%,24%);
+  --ring: hsl(166,68%,50%);
+  --chat-assistant: hsl(223,35%,12%);
+  --chat-assistant-foreground: hsl(210,20%,92%);
+  --sidebar-background: hsl(223,35%,10%);
+  --sidebar-foreground: hsl(210,20%,80%);
+  --sidebar-active: hsl(167,35%,18%);
+  --sidebar-active-foreground: hsl(166,68%,70%);
+  --sidebar-border: hsl(220,20%,24%);
+}
+
+/* Optional accessibility bump */
+html.high-contrast { --border: hsl(210,16%,82%); --muted-foreground: hsl(0,0%,100%); }
+
+/* Make sure global surfaces use variables */
+html, body { background: var(--background); color: var(--foreground); }
 
 /* Base Styles */
 body {
@@ -176,6 +203,25 @@ body {
     width: 1rem;
     height: 1rem;
 }
+
+.message-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 36px;
+}
+.message-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 
 .header-title {
     font-size: 1.125rem;

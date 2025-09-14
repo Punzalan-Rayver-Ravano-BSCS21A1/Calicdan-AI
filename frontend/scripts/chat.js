@@ -9,6 +9,9 @@ let messages = [
 
 let isTyping = false;
 
+// Path to your AI logo/avatar
+const AI_AVATAR = "public/CalicdanLogo.png"; // <-- make sure this file exists
+
 // Determine backend URL automatically
 const BACKEND_URL = `http://127.0.0.1:8000/chat`; // Always point to FastAPI
 
@@ -107,10 +110,15 @@ function renderMessages() {
     const chatMessages = document.getElementById('chatMessages');
     chatMessages.innerHTML = messages.map(message => {
         const isUser = message.sender === 'user';
-        const avatarText = isUser ? 'U' : 'AI';
+
+        // Show user initial OR AI logo
+        const avatarHtml = isUser
+            ? `<div class="message-avatar">U</div>`
+            : `<div class="message-avatar"><img src="${AI_AVATAR}" alt="Calicdan AI" /></div>`;
+
         return `
             <div class="message ${isUser ? 'user-message' : 'assistant-message'}">
-                <div class="message-avatar">${avatarText}</div>
+                ${avatarHtml}
                 <div class="message-content"><p>${escapeHtml(message.content)}</p></div>
             </div>
         `;
