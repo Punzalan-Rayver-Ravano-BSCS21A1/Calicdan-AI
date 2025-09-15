@@ -1,0 +1,43 @@
+Powershell Commands:
+
+First step: go to the directory of your project folder
+Command Example - cd Calicdan-AI
+
+2nd step: Activate Venv
+Command - ./venv/Scripts/activate
+
+3rd step: go to the backend folder using the command (cd backend) and then Install the required packages for the API to work 
+Command - pip install -r requirements.txt
+
+4th step: set the API Key
+Command - $env:OPENAI_API_KEY="sk-c8e10ae8c2f1420ea5deb7e74b68a433" python main.py
+
+5th step:
+
+Last Step: Activate or run the server
+Command - uvicorn main:app --reload
+
+
+
+CMD Commands:
+
+C:\Users\Aaron>cd calicdanAI
+
+C:\Users\Aaron\calicdanAI>cd Calicdan-AI
+
+C:\Users\Aaron\calicdanAI\Calicdan-AI>.\venv\Scripts\Activate.ps1
+
+C:\Users\Aaron\calicdanAI\Calicdan-AI>venv\Scripts\activate.bat
+
+(venv) C:\Users\Aaron\calicdanAI\Calicdan-AI>cd backend
+
+(venv) C:\Users\Aaron\calicdanAI\Calicdan-AI\backend>set DEEPSEEK_API_KEY=sk-c8e10ae8c2f1420ea5deb7e74b68a433
+
+(venv) C:\Users\Aaron\calicdanAI\Calicdan-AI\backend>uvicorn main:app --reload
+INFO:     Will watch for changes in these directories: ['C:\\Users\\Aaron\\calicdanAI\\Calicdan-AI\\backend']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [19628] using WatchFiles
+INFO:     Started server process [25396]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+

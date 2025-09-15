@@ -109,7 +109,7 @@ function initChatPage() {
 function newChat() {
   messages = [{
     id: "1",
-    content: "👋 New chat started! How can I assist you?",
+    content: "👋 I'm Calicdan, Your Messiah Assistant! How can I assist you?",
     sender: "assistant",
     timestamp: new Date().toISOString(),
   }];
