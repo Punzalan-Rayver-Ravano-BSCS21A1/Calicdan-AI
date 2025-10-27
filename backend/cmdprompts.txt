@@ -39,3 +39,22 @@ INFO:     Started server process [25396]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 
+----------------------------------------------
+
+C:\Users\punza\Desktop\Calicdan-AI-main
+
+cd backend
+
+& "C:\Users\punza\AppData\Local\Programs\Python\Python312\python.exe" -m venv venv
+
+.\venv\Scripts\Activate.ps1
+
+python -m pip install --upgrade pip
+
+pip install -r requirement.txt 
+
+$env:DEEPSEEK_API_KEY = "--"
+
+pip install fastapi uvicorn psycopg2-binary sqlalchemy
+
+python main.py
