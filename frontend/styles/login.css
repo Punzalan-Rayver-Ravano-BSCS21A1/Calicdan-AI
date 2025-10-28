@@ -1,0 +1,93 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: var(--bg);
+  transition: background 0.3s;
+}
+
+.login-card {
+  background: var(--card-bg);
+  color: var(--text);
+  padding: 2.5rem 3rem;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  width: 360px;
+  text-align: center;
+  transition: background 0.3s, color 0.3s;
+}
+
+.login-title {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.login-subtitle {
+  font-size: 0.95rem;
+  color: var(--subtext);
+  margin-bottom: 1.5rem;
+}
+
+.login-input {
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 0.95rem;
+  transition: 0.3s;
+}
+
+.login-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 4px var(--accent);
+}
+
+.login-btn {
+  width: 100%;
+  padding: 10px;
+  background: var(--accent);
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.login-btn:hover {
+  background: var(--accent-hover);
+}
+
+.login-footer {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: var(--subtext);
+}
+
+/* === Dark/Light Theme Compatibility === */
+html[data-theme="light"] {
+  --bg: #f5f6fa;
+  --card-bg: #ffffff;
+  --text: #2c2c2c;
+  --subtext: #6c6c6c;
+  --border: #dcdcdc;
+  --input-bg: #fdfdfd;
+  --accent: #0078ff;
+  --accent-hover: #005fcc;
+}
+
+html[data-theme="dark"] {
+  --bg: #0f172a;
+  --card-bg: #1e293b;
+  --text: #f8fafc;
+  --subtext: #cbd5e1;
+  --border: #475569;
+  --input-bg: #1e293b;
+  --accent: #38bdf8;
+  --accent-hover: #0ea5e9;
+}

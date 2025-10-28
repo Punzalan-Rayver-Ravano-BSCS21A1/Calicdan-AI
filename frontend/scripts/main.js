@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeActiveNavigation();
 });
 
+
 // Dropdown functionality
 function initializeDropdowns() {
     document.addEventListener('click', function(e) {

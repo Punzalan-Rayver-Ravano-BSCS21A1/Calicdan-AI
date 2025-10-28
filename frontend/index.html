@@ -4,21 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- No-flash theme bootstrap (apply theme + background BEFORE first paint) -->
+  <!-- No-flash theme bootstrap -->
   <meta name="color-scheme" content="light dark">
   <script>
   (function () {
     try {
       var raw = localStorage.getItem('calicdan-settings') || '{}';
       var cfg = JSON.parse(raw);
-      var choice = (cfg.appearance && cfg.appearance.theme) || 'light'; // 'light' | 'dark' | 'system'
+      var choice = (cfg.appearance && cfg.appearance.theme) || 'light';
       var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
       var resolved = (choice === 'system') ? (prefersDark ? 'dark' : 'light') : choice;
 
-      // Apply theme immediately
       document.documentElement.setAttribute('data-theme', resolved);
-
-      // Inline BG to prevent white flash
       var bg = (resolved === 'dark') ? 'hsl(225, 28%, 7%)' : '#ffffff';
       var style = document.createElement('style');
       style.textContent = 'html,body{background:'+ bg +';}';
@@ -35,11 +32,106 @@
   <meta property="og:description" content="A clean, fast, and reliable AI chatbot interface for Legend of Calicdan. Ask questions, brainstorm ideas, and get work done faster with our intelligent AI assistant.">
   <meta property="og:type" content="website">
 
-  <!-- CSS (main first, then theme overrides, then transitions) -->
+  <!-- CSS -->
   <link rel="stylesheet" href="styles/main.css">
   <link rel="stylesheet" href="styles/theme.css">
   <link rel="stylesheet" href="styles/transitions.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.css">
+
+  <style>
+    /* === AUTH MODAL (LOGIN/SIGNUP) === */
+    .auth-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      backdrop-filter: blur(6px);
+      transition: opacity 0.3s ease;
+    }
+    .auth-modal.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .auth-box {
+      background: var(--bg-primary, #fff);
+      color: var(--text-primary, #000);
+      width: 360px;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      position: relative;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    html[data-theme="dark"] .auth-box {
+      background: #1a1a1a;
+      color: #f2f2f2;
+    }
+    .auth-box h2 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .auth-box input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      background: var(--bg-secondary, #f8f8f8);
+      color: inherit;
+    }
+    html[data-theme="dark"] .auth-box input {
+      background: #2a2a2a;
+      border-color: #444;
+      color: #fff;
+    }
+    .auth-box button {
+      width: 100%;
+      margin-top: 1rem;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      background: #1d72b8;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .auth-box button:hover {
+      background: #155d91;
+    }
+    .auth-close {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: inherit;
+      cursor: pointer;
+    }
+    .auth-switch {
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+    .auth-switch a {
+      color: #1d72b8;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .auth-switch a:hover {
+      text-decoration: underline;
+    }
+    .error {
+      color: #e33;
+      font-size: 0.9rem;
+      text-align: center;
+      display: none;
+      margin-bottom: 0.5rem;
+    }
+  </style>
 </head>
 <body>
   <div class="app-container">
@@ -88,6 +180,12 @@
             <div class="user-avatar">U</div>
             <i data-lucide="chevron-down"></i>
           </div>
+
+          <!-- ✅ NEW LOGIN BUTTON -->
+          <button class="btn btn-primary login-btn">
+            <i data-lucide="log-in"></i>
+            Login
+          </button>
         </div>
       </header>
 
@@ -113,7 +211,6 @@
               </p>
 
               <div class="hero-buttons">
-                <!-- Use an anchor so spa-nav can intercept for smooth soft nav -->
                 <a class="btn btn-primary" href="chat.html">
                   Get Started
                   <i data-lucide="arrow-right"></i>
@@ -173,8 +270,85 @@
     </div>
   </div>
 
+  <!-- === AUTH MODAL STRUCTURE === -->
+  <div id="auth-modal" class="auth-modal hidden">
+    <div class="auth-box">
+      <button class="auth-close" id="closeAuth">&times;</button>
+      <h2 id="auth-title">Login to Calicdan AI</h2>
+      <p id="auth-error" class="error"></p>
+
+      <input type="email" id="auth-email" placeholder="Email" required>
+      <input type="password" id="auth-password" placeholder="Password" required>
+
+      <label><input type="checkbox" id="auth-remember"> Remember me</label>
+      <button id="auth-submit">Login</button>
+
+      <p class="auth-switch">
+        Don’t have an account? <a href="#" id="switchToSignup">Sign Up</a>
+      </p>
+    </div>
+  </div>
+
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <script src="scripts/main.js"></script>
   <script src="scripts/spa-nav.js"></script>
+
+  <script>
+  // ==== Auth Modal JS ====
+  const authModal = document.getElementById("auth-modal");
+  const closeAuth = document.getElementById("closeAuth");
+  const authTitle = document.getElementById("auth-title");
+  const authSubmit = document.getElementById("auth-submit");
+  const switchToSignup = document.getElementById("switchToSignup");
+  const errorMsg = document.getElementById("auth-error");
+
+  document.querySelectorAll(".login-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      authModal.classList.remove("hidden");
+    });
+  });
+
+  closeAuth.addEventListener("click", () => {
+    authModal.classList.add("hidden");
+  });
+
+  let isSignup = false;
+  switchToSignup.addEventListener("click", (e) => {
+    e.preventDefault();
+    isSignup = !isSignup;
+    authTitle.textContent = isSignup ? "Create an Account" : "Login to Calicdan AI";
+    authSubmit.textContent = isSignup ? "Sign Up" : "Login";
+    switchToSignup.textContent = isSignup ? "Back to Login" : "Sign Up";
+    errorMsg.style.display = "none";
+  });
+
+  authSubmit.addEventListener("click", () => {
+    const email = document.getElementById("auth-email").value.trim();
+    const password = document.getElementById("auth-password").value.trim();
+    const remember = document.getElementById("auth-remember").checked;
+
+    if (!email || !password) {
+      errorMsg.textContent = "Please fill in all fields.";
+      errorMsg.style.display = "block";
+      return;
+    }
+
+    if (!isSignup) {
+      if (email === "admin@calicdan.ai" && password === "12345") {
+        errorMsg.style.display = "none";
+        if (remember) localStorage.setItem("loggedIn", "true");
+        authModal.classList.add("hidden");
+      } else {
+        errorMsg.textContent = "Invalid email or password.";
+        errorMsg.style.display = "block";
+      }
+    } else {
+      errorMsg.textContent = "Signup successful! You can now log in.";
+      errorMsg.style.color = "#28a745";
+      errorMsg.style.display = "block";
+      setTimeout(() => switchToSignup.click(), 1500);
+    }
+  });
+  </script>
 </body>
 </html>
