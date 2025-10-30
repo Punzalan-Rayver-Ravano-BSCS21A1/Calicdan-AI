@@ -284,7 +284,7 @@
       <button id="auth-submit">Login</button>
 
       <p class="auth-switch">
-        Don’t have an account? <a href="#" id="switchToSignup">Sign Up</a>
+        Don't have an account? <a href="#" id="switchToSignup">Sign Up</a>
       </p>
     </div>
   </div>
@@ -293,62 +293,118 @@
   <script src="scripts/main.js"></script>
   <script src="scripts/spa-nav.js"></script>
 
-  <script>
-  // ==== Auth Modal JS ====
-  const authModal = document.getElementById("auth-modal");
-  const closeAuth = document.getElementById("closeAuth");
-  const authTitle = document.getElementById("auth-title");
-  const authSubmit = document.getElementById("auth-submit");
-  const switchToSignup = document.getElementById("switchToSignup");
-  const errorMsg = document.getElementById("auth-error");
+<script>
+const authModal = document.getElementById("auth-modal");
+const closeAuth = document.getElementById("closeAuth");
+const authTitle = document.getElementById("auth-title");
+const authSubmit = document.getElementById("auth-submit");
+const switchToSignup = document.getElementById("switchToSignup");
+const errorMsg = document.getElementById("auth-error");
+const loginBtn = document.querySelector(".login-btn");
+const userMenu = document.querySelector(".user-menu");
 
-  document.querySelectorAll(".login-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      authModal.classList.remove("hidden");
-    });
-  });
+let isSignup = false;
 
-  closeAuth.addEventListener("click", () => {
-    authModal.classList.add("hidden");
-  });
-
-  let isSignup = false;
-  switchToSignup.addEventListener("click", (e) => {
-    e.preventDefault();
-    isSignup = !isSignup;
-    authTitle.textContent = isSignup ? "Create an Account" : "Login to Calicdan AI";
-    authSubmit.textContent = isSignup ? "Sign Up" : "Login";
-    switchToSignup.textContent = isSignup ? "Back to Login" : "Sign Up";
-    errorMsg.style.display = "none";
-  });
-
-  authSubmit.addEventListener("click", () => {
-    const email = document.getElementById("auth-email").value.trim();
-    const password = document.getElementById("auth-password").value.trim();
-    const remember = document.getElementById("auth-remember").checked;
-
-    if (!email || !password) {
-      errorMsg.textContent = "Please fill in all fields.";
-      errorMsg.style.display = "block";
-      return;
+// ✅ CHECK LOGIN STATE ON PAGE LOAD
+function updateUIBasedOnAuth() {
+  const isLoggedIn = localStorage.getItem("loggedIn") === "true";
+  const userEmail = localStorage.getItem("userEmail") || "";
+  
+  if (isLoggedIn) {
+    // Hide login button, show user menu
+    loginBtn.style.display = "none";
+    userMenu.style.display = "flex";
+    
+    // Update avatar with first letter of email
+    const avatar = document.querySelector(".user-avatar");
+    if (userEmail && avatar) {
+      avatar.textContent = userEmail.charAt(0).toUpperCase();
     }
+  } else {
+    // Show login button, hide user menu
+    loginBtn.style.display = "flex";
+    userMenu.style.display = "none";
+  }
+}
 
-    if (!isSignup) {
-      if (email === "admin@calicdan.ai" && password === "12345") {
-        errorMsg.style.display = "none";
-        if (remember) localStorage.setItem("loggedIn", "true");
-        authModal.classList.add("hidden");
-      } else {
-        errorMsg.textContent = "Invalid email or password.";
-        errorMsg.style.display = "block";
-      }
-    } else {
+// Run on page load
+updateUIBasedOnAuth();
+
+// Open modal
+document.querySelectorAll(".login-btn").forEach(btn => {
+  btn.addEventListener("click", () => authModal.classList.remove("hidden"));
+});
+
+// Close modal
+closeAuth.addEventListener("click", () => authModal.classList.add("hidden"));
+
+// Switch mode
+switchToSignup.addEventListener("click", (e) => {
+  e.preventDefault();
+  isSignup = !isSignup;
+  authTitle.textContent = isSignup ? "Create an Account" : "Login to Calicdan AI";
+  authSubmit.textContent = isSignup ? "Sign Up" : "Login";
+  switchToSignup.textContent = isSignup ? "Back to Login" : "Sign Up";
+  errorMsg.style.display = "none";
+});
+
+// Handle submit
+authSubmit.addEventListener("click", async () => {
+  const email = document.getElementById("auth-email").value.trim();
+  const password = document.getElementById("auth-password").value.trim();
+  const remember = document.getElementById("auth-remember").checked;
+
+  if (!email || !password) {
+    errorMsg.textContent = "Please fill in all fields.";
+    errorMsg.style.display = "block";
+    return;
+  }
+
+  const endpoint = isSignup ? "/signup" : "/login";
+
+  try {
+    const res = await fetch(`http://127.0.0.1:8000${endpoint}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.detail || "Something went wrong");
+
+    errorMsg.style.display = "none";
+    if (isSignup) {
       errorMsg.textContent = "Signup successful! You can now log in.";
       errorMsg.style.color = "#28a745";
       errorMsg.style.display = "block";
       setTimeout(() => switchToSignup.click(), 1500);
+    } else {
+      // ✅ SAVE USER DATA AND UPDATE UI
+      localStorage.setItem("loggedIn", "true");
+      localStorage.setItem("userEmail", email);
+      authModal.classList.add("hidden");
+      updateUIBasedOnAuth(); // ← UPDATE UI IMMEDIATELY
+      alert("Login successful!");
     }
-  });
-  </script>
+  } catch (err) {
+    errorMsg.textContent = err.message;
+    errorMsg.style.color = "#e33";
+    errorMsg.style.display = "block";
+  }
+});
+
+// ✅ ADD LOGOUT FUNCTIONALITY
+userMenu.addEventListener("click", () => {
+  const confirmLogout = confirm("Do you want to logout?");
+  if (confirmLogout) {
+    localStorage.removeItem("loggedIn");
+    localStorage.removeItem("userEmail");
+    updateUIBasedOnAuth();
+    alert("Logged out successfully!");
+  }
+});
+</script>
+
 </body>
 </html>

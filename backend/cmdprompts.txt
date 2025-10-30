@@ -58,3 +58,35 @@ $env:DEEPSEEK_API_KEY = "--"
 pip install fastapi uvicorn psycopg2-binary sqlalchemy
 
 python main.py
+
+
+updated steps
+
+first, navigate to the project using the cd command
+after that:
+# 1. Navigate to your backend folder
+cd backend
+
+# 2. Create a Python virtual environment (isolated Python installation)
+& "C:\Users\punza\AppData\Local\Programs\Python\Python312\python.exe" -m venv venv
+
+# 3. Activate the virtual environment (required before installing packages)
+.\venv\Scripts\Activate.ps1
+
+# 4. Upgrade pip to latest version
+python -m pip install --upgrade pip
+
+# 5. Install all dependencies from requirements.txt file
+pip install -r requirements.txt  # Note: should be "requirements.txt" not "requirement.txt"
+
+# 6. Set your DeepSeek API key (replace -- with your actual key)
+$env:DEEPSEEK_API_KEY = "your-actual-api-key-here"
+
+# 7. Set your database URL (IMPORTANT - add this!)
+$env:DATABASE_URL = "your-neon-postgres-url-here"
+
+# 8. Install additional packages if not in requirements.txt
+pip install fastapi uvicorn psycopg2-binary python-dotenv
+
+# 9. Run your FastAPI server
+python main.py

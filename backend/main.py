@@ -1,15 +1,25 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-import os
-import requests
-import time
+import os, requests, time, psycopg2
 from dotenv import load_dotenv
-from database import get_connection  # ✅ import your Neon DB connector
+from database import get_connection, return_connection, initialize_pool, close_pool
+from contextlib import asynccontextmanager
 
 load_dotenv()
 
-app = FastAPI()
+# Lifespan context manager for startup/shutdown
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    print("🚀 Starting Calicdan AI Backend...")
+    initialize_pool()
+    yield
+    # Shutdown
+    close_pool()
+    print("👋 Shutting down gracefully")
+
+app = FastAPI(lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -18,13 +28,9 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-class ChatRequest(BaseModel):
-    message: str
-    user_id: str | None = None  # optional, if you’ll add users later
-
-class ChatResponse(BaseModel):
-    reply: str
-
+# -------------------------
+# 🧠 DeepSeek AI Config
+# -------------------------
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 
 DEEPSEEK_MODELS = {
@@ -32,64 +38,160 @@ DEEPSEEK_MODELS = {
     "deepseek-coder": "deepseek-coder",
     "deepseek-llm": "deepseek-llm",
 }
-
 SELECTED_MODEL = "deepseek-chat"
 
+class ChatRequest(BaseModel):
+    message: str
+    user_id: str | None = None
+
+class ChatResponse(BaseModel):
+    reply: str
+
+
+# ===============================
+# 🔹 LOGIN & SIGNUP ENDPOINTS
+# ===============================
+@app.post("/signup")
+async def signup(request: Request):
+    data = await request.json()
+    email = data.get("email")
+    password = data.get("password")
+
+    if not email or not password:
+        raise HTTPException(status_code=400, detail="Email and password required")
+
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        
+        cur.execute("SELECT * FROM users WHERE email=%s", (email,))
+        if cur.fetchone():
+            raise HTTPException(status_code=400, detail="Email already registered")
+
+        cur.execute("INSERT INTO users (email, password) VALUES (%s, %s)", (email, password))
+        conn.commit()
+        return {"message": "Signup successful ✅"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Signup error: {e}")
+        if conn and not conn.closed:
+            try:
+                conn.rollback()
+            except:
+                pass
+        raise HTTPException(status_code=500, detail="Database error occurred")
+    finally:
+        if cur:
+            try:
+                cur.close()
+            except:
+                pass
+        if conn:
+            try:
+                return_connection(conn)
+            except:
+                pass
+
+
+@app.post("/login")
+async def login(request: Request):
+    data = await request.json()
+    email = data.get("email")
+    password = data.get("password")
+
+    if not email or not password:
+        raise HTTPException(status_code=400, detail="Email and password required")
+
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM users WHERE email=%s AND password=%s", (email, password))
+        user = cur.fetchone()
+
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+
+        return {"message": "Login successful ✅", "email": user[1]}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Login error: {e}")
+        raise HTTPException(status_code=500, detail="Database error occurred")
+    finally:
+        if cur:
+            try:
+                cur.close()
+            except:
+                pass
+        if conn:
+            try:
+                return_connection(conn)
+            except:
+                pass
+
+
+# ===============================
+# 🤖 CHAT ENDPOINTS (DeepSeek)
+# ===============================
 @app.post("/chat", response_model=ChatResponse)
 async def chat_endpoint(request: ChatRequest):
     user_message = request.message.strip()
     if not user_message:
         raise HTTPException(status_code=400, detail="Message cannot be empty.")
-
     if not DEEPSEEK_API_KEY:
         raise HTTPException(status_code=500, detail="DeepSeek API key not configured")
 
     try:
-        # ✅ Call AI model
         response = await call_deepseek_api(user_message, SELECTED_MODEL)
-
-        # ✅ Save chat to DB (for history)
         save_chat_to_db(request.user_id or "guest", user_message, response)
-
         return ChatResponse(reply=response)
-
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"API error: {str(e)}")
 
+
 def save_chat_to_db(user_id: str, user_message: str, ai_reply: str):
-    """Insert chat message into the Neon PostgreSQL database"""
+    conn = None
+    cur = None
     try:
         conn = get_connection()
         cur = conn.cursor()
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS chat_history (
-                id SERIAL PRIMARY KEY,
-                user_id VARCHAR(50),
-                user_message TEXT,
-                ai_reply TEXT,
-                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        """)
         cur.execute(
             "INSERT INTO chat_history (user_id, user_message, ai_reply) VALUES (%s, %s, %s)",
             (user_id, user_message, ai_reply)
         )
         conn.commit()
-        cur.close()
-        conn.close()
     except Exception as e:
         print(f"⚠️ Failed to save chat: {e}")
+        if conn and not conn.closed:
+            try:
+                conn.rollback()
+            except:
+                pass
+    finally:
+        if cur:
+            try:
+                cur.close()
+            except:
+                pass
+        if conn:
+            try:
+                return_connection(conn)
+            except:
+                pass
+
 
 async def call_deepseek_api(message: str, model: str) -> str:
     url = "https://api.deepseek.com/v1/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
-        "Content-Type": "application/json"
-    }
+    headers = {"Authorization": f"Bearer {DEEPSEEK_API_KEY}", "Content-Type": "application/json"}
     payload = {
         "model": model,
         "messages": [
-            {"role": "system", "content": "You are a helpful AI assistant for students. Keep responses concise and helpful."},
+            {"role": "system", "content": "You are a helpful AI assistant for students."},
             {"role": "user", "content": message}
         ],
         "temperature": 0.7,
@@ -102,60 +204,24 @@ async def call_deepseek_api(message: str, model: str) -> str:
             if response.status_code == 200:
                 data = response.json()
                 return data['choices'][0]['message']['content']
-            else:
-                if attempt == 2:
-                    raise Exception(f"DeepSeek API error: {response.status_code} - {response.text}")
+            if attempt == 2:
+                raise Exception(f"DeepSeek API error: {response.status_code} - {response.text}")
         except requests.exceptions.Timeout:
             if attempt == 2:
-                raise Exception("DeepSeek API timeout after 3 attempts (60s each)")
+                raise Exception("DeepSeek API timeout after 3 attempts")
             time.sleep(2)
         except requests.exceptions.ConnectionError:
             if attempt == 2:
                 raise Exception("Connection error to DeepSeek API")
             time.sleep(3)
-        except Exception as e:
-            if attempt == 2:
-                raise e
-            time.sleep(1)
-    raise Exception("Failed to get response from DeepSeek API after 3 attempts")
+    raise Exception("Failed to get response from DeepSeek API")
 
-@app.get("/models")
-async def list_models():
-    return {
-        "available_models": list(DEEPSEEK_MODELS.keys()),
-        "current_model": SELECTED_MODEL
-    }
-
-@app.post("/change-model/{model_name}")
-async def change_model(model_name: str):
-    global SELECTED_MODEL
-    if model_name in DEEPSEEK_MODELS:
-        SELECTED_MODEL = DEEPSEEK_MODELS[model_name]
-        return {"message": f"Model changed to {model_name}", "current_model": SELECTED_MODEL}
-    else:
-        raise HTTPException(status_code=400, detail="Invalid model name")
 
 @app.get("/health")
 async def health_check():
-    return {
-        "status": "healthy",
-        "api_provider": "DeepSeek",
-        "current_model": SELECTED_MODEL
-    }
+    return {"status": "healthy", "api_provider": "DeepSeek", "model": SELECTED_MODEL}
 
-@app.get("/test-connection")
-async def test_connection():
-    try:
-        test_response = await call_deepseek_api("Hello", "deepseek-chat")
-        return {
-            "status": "connected",
-            "response_preview": test_response[:100] + "..."
-        }
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
 
 if __name__ == "__main__":
     import uvicorn
-    print("Starting Calicdan AI Backend...")
-    print(f"Using model: {SELECTED_MODEL}")
     uvicorn.run(app, host="0.0.0.0", port=8000)
