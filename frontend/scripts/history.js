@@ -1,28 +1,54 @@
 // History page functionality
 
-const chatSessions = [
-    {
-        id: '1',
-        title: 'Quarterly Planning Recap',
-        preview: 'Key initiatives for Q4 include...',
-        timestamp: 'Yesterday',
-        tags: ['planning', 'business']
-    },
-    {
-        id: '2',
-        title: 'Bug Triage Notes',
-        preview: 'Top issues ranked by impact...',
-        timestamp: '2 days ago',
-        tags: ['development', 'bugs']
-    },
-    {
-        id: '3',
-        title: 'Travel Itinerary',
-        preview: 'Flights on Tuesday at 9am...',
-        timestamp: 'Last week',
-        tags: ['travel', 'personal']
-    }
-];
+let chatSessions = [];
+
+function getUserIdForHistory() {
+    try {
+        const sessionRaw = localStorage.getItem('calicdan-session');
+        const session = sessionRaw ? JSON.parse(sessionRaw) : null;
+        return session && session.user_id ? session.user_id : null;
+    } catch (e) { return null; }
+}
+
+function getUserChatHistory() {
+    const userId = getUserIdForHistory();
+    if (!userId) return [];
+    const currentKey = 'chatHistory_user_' + userId;
+    const threadsKey = 'chatThreads_user_' + userId;
+    try {
+        const rawCurrent = localStorage.getItem(currentKey);
+        const currentMessages = rawCurrent ? JSON.parse(rawCurrent) : [];
+        const rawThreads = localStorage.getItem(threadsKey);
+        const threads = rawThreads ? JSON.parse(rawThreads) : [];
+        const all = [];
+        // archived threads
+        if (Array.isArray(threads)) {
+            threads.forEach(t => { if (t && Array.isArray(t.messages)) all.push(t.messages); });
+        }
+        // include current conversation as last thread
+        if (Array.isArray(currentMessages) && currentMessages.length) {
+            all.push(currentMessages);
+        }
+        return all;
+    } catch (e) { return []; }
+}
+
+function deriveSessionsFromMessages(allThreads) {
+    // Each thread becomes one session card using the first user message as title/preview
+    const sessions = allThreads.map((thread, idx) => {
+        const firstUser = Array.isArray(thread) ? thread.find(m => m && m.sender === 'user') : null;
+        const lastMsg = Array.isArray(thread) && thread.length ? thread[thread.length - 1] : null;
+        return {
+            id: String((firstUser && firstUser.id) || (Date.now() - idx)),
+            title: ((firstUser && firstUser.content) || 'Conversation').slice(0, 40),
+            preview: ((firstUser && firstUser.content) || '').slice(0, 80),
+            timestamp: new Date((lastMsg && lastMsg.timestamp) || Date.now()).toLocaleDateString(),
+            tags: []
+        };
+    });
+    // Show most recent first
+    return sessions.reverse();
+}
 
 let currentSearchQuery = '';
 let currentDateFilter = '30';
@@ -33,6 +59,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeHistory() {
+    // Load per-user chat history into sessions
+    const threads = getUserChatHistory();
+    chatSessions = deriveSessionsFromMessages(threads);
+
     const searchInput = document.getElementById('searchInput');
     
     // Handle search input

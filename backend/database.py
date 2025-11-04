@@ -2,6 +2,7 @@ import psycopg2
 from psycopg2 import pool
 import os
 from dotenv import load_dotenv
+import bcrypt  # ✅ Added for password hashing
 
 load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -18,7 +19,8 @@ def initialize_pool():
             1,  # min connections
             10,  # max connections
             DATABASE_URL,
-            sslmode='require',
+            # Use 'prefer' to work with local dev instances that may not have SSL
+            sslmode='prefer',
             connect_timeout=10,
             keepalives=1,
             keepalives_idle=30,
@@ -41,14 +43,26 @@ def initialize_pool():
             );
         """)
         
-        # Chat history table
+        # ✅ Chat history table - now properly linked to user id
         cur.execute("""
             CREATE TABLE IF NOT EXISTS chat_history (
                 id SERIAL PRIMARY KEY,
-                user_id VARCHAR(50),
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
                 user_message TEXT,
                 ai_reply TEXT,
                 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        """)
+        
+        # ✅ Sessions table for proper logout tracking
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS user_sessions (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                session_token TEXT UNIQUE NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                expires_at TIMESTAMP NOT NULL,
+                is_active BOOLEAN DEFAULT TRUE
             );
         """)
         
@@ -74,7 +88,7 @@ def get_connection():
             conn = connection_pool.getconn()
         return conn
     else:
-        return psycopg2.connect(DATABASE_URL, sslmode='require')
+        return psycopg2.connect(DATABASE_URL, sslmode='prefer')
 
 def return_connection(conn):
     """Return connection to pool"""
@@ -88,3 +102,14 @@ def close_pool():
     if connection_pool:
         connection_pool.closeall()
         print("✅ Database connection pool closed")
+
+# ✅ NEW: Password hashing utilities
+def hash_password(password: str) -> str:
+    """Hash a password using bcrypt"""
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed.decode('utf-8')
+
+def verify_password(password: str, hashed: str) -> bool:
+    """Verify a password against its hash"""
+    return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))

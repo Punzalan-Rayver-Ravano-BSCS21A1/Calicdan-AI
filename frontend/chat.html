@@ -3,13 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="public/CalicdanLogo.png">
 
   <!-- No-flash theme bootstrap -->
   <meta name="color-scheme" content="light dark">
   <script>
   (function () {
     try {
-      var raw = localStorage.getItem('calicdan-settings') || '{}';
+      // Prefer per-user settings if logged in
+      var sessionRaw = localStorage.getItem('calicdan-session');
+      var userId = null;
+      try { userId = sessionRaw ? JSON.parse(sessionRaw).user_id : null; } catch (e) {}
+      var perUserKey = userId ? ('calicdan-settings_user_' + userId) : null;
+      var raw = (perUserKey && localStorage.getItem(perUserKey)) || localStorage.getItem('calicdan-settings') || '{}';
       var cfg = JSON.parse(raw);
       var choice = (cfg.appearance && cfg.appearance.theme) || 'light';
       var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -73,9 +79,23 @@
           <h1 class="header-title">Legend of Calicdan</h1>
         </div>
         <div class="header-right">
-          <div class="user-menu">
-            <div class="user-avatar">U</div>
-            <i data-lucide="chevron-down"></i>
+          <!-- ✅ User dropdown menu -->
+          <div class="user-dropdown" style="position: relative;">
+            <button class="user-menu" id="userMenuButton" style="cursor: pointer; display: flex; align-items: center; gap: 8px; background: none; border: none; padding: 8px;">
+              <div class="user-avatar">U</div>
+              <i data-lucide="chevron-down"></i>
+            </button>
+            
+            <!-- Dropdown content -->
+            <div id="userDropdownMenu" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 8px; background: var(--bg-primary, #fff); border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 180px; z-index: 1000;">
+              <div style="padding: 12px; border-bottom: 1px solid #eee;">
+                <p id="userEmail" style="margin: 0; font-size: 13px; color: #666; font-weight: 500;"></p>
+              </div>
+              <button id="logoutButton" style="width: 100%; padding: 12px; text-align: left; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; color: #e33; font-weight: 500; transition: background 0.2s;">
+                <i data-lucide="log-out" style="width: 16px; height: 16px;"></i>
+                Logout
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -169,12 +189,13 @@
         <!-- Chat Input -->
         <div class="chat-input">
           <div class="input-container">
-            <button class="input-btn">
+            <button class="input-btn" id="attachButton">
               <i data-lucide="paperclip"></i>
             </button>
             <button class="input-btn">
               <i data-lucide="mic"></i>
             </button>
+            <input type="file" id="fileAttachment" accept="image/*" style="display:none" />
             
             <div class="input-wrapper">
               <input type="text" id="messageInput" placeholder="Type your message..." />
@@ -190,9 +211,70 @@
     </div>
   </div>
 
+  <!-- Markdown library (for bold text support) -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="scripts/auth.js"></script>
   <script src="scripts/main.js"></script>
-  <script src="scripts/chat.js?v=5"></script>
+  <script src="scripts/chat.js"></script>
   <script src="scripts/spa-nav.js"></script>
+
+<script>
+// ✅ User dropdown functionality for chat page
+const userMenuButton = document.getElementById('userMenuButton');
+const userDropdownMenu = document.getElementById('userDropdownMenu');
+const logoutButton = document.getElementById('logoutButton');
+const userEmailDisplay = document.getElementById('userEmail');
+
+// Update email display
+if (window.AuthModule) {
+  const session = window.AuthModule.getSession();
+  if (session && session.email) {
+    userEmailDisplay.textContent = session.email;
+    
+    // Update avatar
+    const avatar = document.querySelector('.user-avatar');
+    if (avatar) {
+      avatar.textContent = session.email.charAt(0).toUpperCase();
+    }
+  }
+}
+
+// Toggle dropdown
+userMenuButton.addEventListener('click', function(e) {
+  e.stopPropagation();
+  const isVisible = userDropdownMenu.style.display === 'block';
+  userDropdownMenu.style.display = isVisible ? 'none' : 'block';
+  
+  // Re-render icons after showing dropdown
+  if (typeof lucide !== "undefined") {
+    lucide.createIcons();
+  }
+});
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+  if (!userMenuButton.contains(e.target) && !userDropdownMenu.contains(e.target)) {
+    userDropdownMenu.style.display = 'none';
+  }
+});
+
+// Logout functionality
+logoutButton.addEventListener('click', function() {
+  if (confirm("Are you sure you want to logout?")) {
+    if (window.AuthModule) {
+      window.AuthModule.handleLogout();
+    }
+  }
+});
+
+// Hover effect
+logoutButton.addEventListener('mouseenter', function() {
+  this.style.background = '#fee';
+});
+logoutButton.addEventListener('mouseleave', function() {
+  this.style.background = 'none';
+});
+</script>
 </body>
 </html>

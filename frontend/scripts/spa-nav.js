@@ -10,7 +10,7 @@
   const CONTAINER_SEL = '.app-container';   // what we replace between pages
   const ENTER_CLASS = 'page-enter';
   const LEAVE_CLASS = 'page-leave';
-  const DURATION = 280; // keep in sync with CSS
+  const DURATION = 320; // keep in sync with CSS
 
   // Prefetch on hover for snappier nav
   document.addEventListener('mouseover', (e) => {

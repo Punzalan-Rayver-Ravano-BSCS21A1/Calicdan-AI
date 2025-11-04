@@ -155,9 +155,18 @@ function initializeFormControls() {
     }
 }
 
+function getSettingsStorageKey() {
+    try {
+        const sessionRaw = localStorage.getItem('calicdan-session');
+        const session = sessionRaw ? JSON.parse(sessionRaw) : null;
+        if (session && session.user_id) return 'calicdan-settings_user_' + session.user_id;
+    } catch (e) {}
+    return 'calicdan-settings';
+}
+
 function loadSettings() {
-    // Load settings from localStorage or use defaults
-    const savedSettings = localStorage.getItem('calicdan-settings');
+    // Load settings from per-user localStorage or use defaults
+    const savedSettings = localStorage.getItem(getSettingsStorageKey());
     if (savedSettings) {
         settings = { ...settings, ...JSON.parse(savedSettings) };
     }
@@ -200,7 +209,7 @@ function loadSettings() {
 }
 
 function saveSettings() {
-    localStorage.setItem('calicdan-settings', JSON.stringify(settings));
+    localStorage.setItem(getSettingsStorageKey(), JSON.stringify(settings));
 }
 
 function handleClearData() {
