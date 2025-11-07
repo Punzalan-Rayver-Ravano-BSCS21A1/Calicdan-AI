@@ -1,4 +1,4 @@
-// Customer Service page functionality
+// Customer Service page functionality with EmailJS integration
 
 let attachedFiles = [];
 
@@ -63,7 +63,8 @@ function initializeCustomerService() {
     });
 }
 
-function handleFormSubmit(e) {
+// Main form submission handler with email integration
+async function handleFormSubmit(e) {
     e.preventDefault();
     
     const formData = new FormData(e.target);
@@ -85,25 +86,92 @@ function handleFormSubmit(e) {
         return;
     }
     
-    // Simulate form submission
-    const submitData = {
+    // Prepare ticket data
+    const ticketData = {
         subject: subject.trim(),
         description: description.trim(),
-        attachments: attachedFiles.map(file => file.name),
+        attachments: attachedFiles,
         timestamp: new Date().toISOString()
     };
     
-    console.log('Support ticket submitted:', submitData);
+    console.log('Support ticket submitted:', ticketData);
     
-    // Show success message
+    // Show loading state
     if (window.AppUtils) {
-        window.AppUtils.showNotification('Support ticket submitted successfully! We\'ll get back to you soon.', 'success');
+        window.AppUtils.showNotification('Sending support ticket...', 'info');
     }
     
-    // Reset form
-    resetForm();
+    // Send email and handle response
+    const emailSent = await sendEmail(ticketData);
+    
+    if (emailSent) {
+        // Show success message
+        if (window.AppUtils) {
+            window.AppUtils.showNotification('Support ticket submitted successfully! We\'ll get back to you soon.', 'success');
+        }
+        
+        // Reset form
+        resetForm();
+    } else {
+        // Show error message
+        if (window.AppUtils) {
+            window.AppUtils.showNotification('Failed to submit support ticket. Please try again.', 'error');
+        }
+    }
 }
 
+/**
+ * Main email sending function
+ * @param {Object} ticketData - The support ticket data
+ * @returns {Promise<boolean>} - Returns true if email sent successfully, false otherwise
+ */
+async function sendEmail(ticketData) {
+    const { subject, description, attachments } = ticketData;
+    
+    // EmailJS configuration
+    const serviceID = 'service_ri53pum';
+    const templateID = 'template_vyqyw3v';
+    
+    // Prepare template parameters
+    const templateParams = {
+        from_name: 'Customer Support Form',
+        subject: subject,
+        message: description,
+        description: description,
+        timestamp: new Date().toLocaleString(),
+        attachments_count: attachments.length,
+        attachments_list: attachments.length > 0 
+            ? attachments.map(f => `${f.name} (${(f.size / 1024).toFixed(2)} KB)`).join(', ')
+            : 'No attachments',
+        reply_to: 'noreply@calicdan.com'
+    };
+    
+    try {
+        // Check if EmailJS is loaded
+        if (typeof emailjs === 'undefined') {
+            console.error('EmailJS library not loaded');
+            return false;
+        }
+        
+        // Send email using EmailJS
+        const response = await emailjs.send(serviceID, templateID, templateParams);
+        
+        // Check response status
+        if (response.status === 200) {
+            console.log('Email sent successfully:', response);
+            return true;
+        } else {
+            console.error('Email sending failed with status:', response.status);
+            return false;
+        }
+        
+    } catch (error) {
+        console.error('EmailJS error:', error);
+        return false;
+    }
+}
+
+// File handling functions
 function handleFileSelect(e) {
     const files = Array.from(e.target.files);
     handleFiles(files);
