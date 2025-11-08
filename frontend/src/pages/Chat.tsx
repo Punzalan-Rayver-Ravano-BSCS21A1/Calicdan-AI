@@ -170,18 +170,13 @@ export default function Chat() {
               
               <div
                 className={cn(
-                  "rounded-2xl px-4 py-3 max-w-2xl chat-message",
+                  "rounded-2xl px-4 py-3 max-w-2xl",
                   message.sender === "user"
                     ? "bg-chat-user text-chat-user-foreground ml-12"
                     : "bg-chat-assistant text-chat-assistant-foreground"
                 )}
               >
-                <div 
-                  className="text-sm leading-relaxed"
-                  dangerouslySetInnerHTML={{ 
-                    __html: message.content.replace(/\n/g, '<br />') 
-                  }}
-                />
+                <p className="text-sm leading-relaxed">{message.content}</p>
               </div>
 
               {message.sender === "user" && (

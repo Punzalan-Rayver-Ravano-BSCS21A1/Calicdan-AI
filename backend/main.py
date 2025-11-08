@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request, Header
+from fastapi import FastAPI, HTTPException, Request, Header, Depends
 from pydantic import BaseModel, EmailStr
 from fastapi.middleware.cors import CORSMiddleware
 import os, requests, time, psycopg2
@@ -12,6 +12,7 @@ import secrets  # ✅ For generating session tokens
 from datetime import datetime, timedelta
 import re  # ✅ For email validation
 
+app = FastAPI()
 load_dotenv()
 
 # Lifespan context manager for startup/shutdown
@@ -407,3 +408,57 @@ async def health_check():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+
+@app.delete("/api/sessions/{session_id}")
+async def delete_session(session_id: int, session_token: str = Header(None, alias="Authorization")):
+    """
+    Delete a chat session by ID. Requires valid session token in Authorization header.
+    """
+    # Validate user session
+    user_id = validate_session(session_token)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid or expired session")
+
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+
+        # Delete session only if it belongs to the logged-in user
+        cur.execute("""
+            DELETE FROM chat_history
+            WHERE id = %s AND user_id = %s
+            RETURNING id
+        """, (session_id, user_id))
+
+        deleted = cur.fetchone()
+        conn.commit()
+
+        if not deleted:
+            raise HTTPException(status_code=404, detail="Session not found")
+
+        return {"success": True, "deleted_id": deleted[0]}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error deleting session: {e}")
+        if conn and not conn.closed:
+            try:
+                conn.rollback()
+            except:
+                pass
+        raise HTTPException(status_code=500, detail="Failed to delete session")
+    finally:
+        if cur:
+            try:
+                cur.close()
+            except:
+                pass
+        if conn:
+            try:
+                return_connection(conn)
+            except:
+                pass

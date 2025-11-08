@@ -92,21 +92,37 @@ function saveMessages() {
 
 function archiveCurrentConversation() {
   try {
-    // Only archive if there is actual conversation beyond the initial assistant message
-    const hasUserMessage = Array.isArray(messages) && messages.some(m => m && m.sender === "user");
-    if (!hasUserMessage) return;
+    if (!Array.isArray(messages) || !messages.some(m => m.sender === "user")) return;
 
     const threadsKey = getChatThreadsKey();
     const raw = localStorage.getItem(threadsKey);
     const threads = raw ? JSON.parse(raw) : [];
+
+    // Avoid duplicating the last thread
+    const lastThread = threads[threads.length - 1];
+    const lastThreadMessages = lastThread?.messages || [];
+    if (JSON.stringify(lastThreadMessages) === JSON.stringify(messages)) {
+      return; // Already archived
+    }
+
+    const conversationId = Date.now().toString();
     threads.push({
-      id: Date.now().toString(),
-      messages: messages,
+      id: conversationId,
+      title: messages.find(m => m.sender === "user")?.content?.slice(0, 30) || "Untitled Chat",
+      messages: [...messages],
       endedAt: new Date().toISOString(),
     });
-    localStorage.setItem(threadsKey, JSON.stringify(threads));
-  } catch {}
+
+    localStorage.setItem(getChatThreadsKey(), JSON.stringify(threads));
+    messages = [];
+    saveMessages();
+  } catch (error) {
+    console.error("Failed to archive conversation:", error);
+  }
 }
+
+
+
 
 // ---- Time formatting ----
 function formatTime(ts) {
@@ -203,9 +219,11 @@ async function onAttachmentSelected(e) {
 
 // ---- Actions ----
 function newChat() {
-  archiveCurrentConversation();
+  archiveCurrentConversation(); // archive before resetting
+
+  // Start fresh conversation
   messages = [{
-    id: "1",
+    id: Date.now().toString(),
     content: "👋 I'm Calicdan, Your Messiah Assistant! How can I assist you?",
     sender: "assistant",
     timestamp: new Date().toISOString(),
@@ -213,6 +231,7 @@ function newChat() {
   saveMessages();
   renderMessages(true);
 }
+
 
 function clearChat() {
   // ✅ Archive current conversation before clearing
@@ -436,8 +455,14 @@ function scrollToBottom(force = false) {
   requestAnimationFrame(scrollFn);
 }
 
+// ✅ Automatically archive conversation when leaving the chat page
+window.addEventListener("beforeunload", () => {
+  archiveCurrentConversation();
+});
+
 // ---- Utils ----
 function escapeHtml(text) {
   const map = { "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" };
   return String(text).replace(/[&<>"']/g, (m) => map[m]);
 }
+

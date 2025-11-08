@@ -131,7 +131,6 @@ async function sendEmail(ticketData) {
     // EmailJS configuration
     const serviceID = 'service_ri53pum';
     const templateID = 'template_vyqyw3v';
-    const publicKey = 'JxsG97jsOlLyBOn0s'; // REPLACE THIS with your actual EmailJS public key
     
     // Prepare template parameters
     const templateParams = {
@@ -153,9 +152,6 @@ async function sendEmail(ticketData) {
             console.error('EmailJS library not loaded');
             return false;
         }
-        
-        // Initialize EmailJS with public key
-        emailjs.init(publicKey);
         
         // Send email using EmailJS
         const response = await emailjs.send(serviceID, templateID, templateParams);
