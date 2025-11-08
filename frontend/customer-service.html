@@ -1,43 +1,37 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
+    <html lang="en" data-theme="light"></html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- No-flash theme bootstrap (apply theme + background BEFORE first paint) -->
-    <meta name="color-scheme" content="light dark">
-    
-    <!-- EmailJS Library -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-    <script type="text/javascript">
-        (function(){
-            emailjs.init({
-                publicKey: "JxsG97jsOlLyBOn0sY",
-            });
-        })();
-    </script>
-    
-    <!-- Theme Script -->
-    <script>
-        (function () {
-            try {
-                var raw = localStorage.getItem('calicdan-settings') || '{}';
-                var cfg = JSON.parse(raw);
-                var choice = (cfg.appearance && cfg.appearance.theme) || 'light'; // 'light' | 'dark' | 'system'
-                var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                var resolved = (choice === 'system') ? (prefersDark ? 'dark' : 'light') : choice;
+    <link rel="icon" href="public/CalicdanLogo.png">
+      <!-- No-flash theme bootstrap (apply theme + background BEFORE first paint) -->
+  <meta name="color-scheme" content="light dark">
+  <script>
+  (function () {
+    try {
+      // Prefer per-user settings if logged in
+      var sessionRaw = localStorage.getItem('calicdan-session');
+      var userId = null;
+      try { userId = sessionRaw ? JSON.parse(sessionRaw).user_id : null; } catch (e) {}
+      var perUserKey = userId ? ('calicdan-settings_user_' + userId) : null;
+      var raw = (perUserKey && localStorage.getItem(perUserKey)) || localStorage.getItem('calicdan-settings') || '{}';
+      var cfg = JSON.parse(raw);
+      var choice = (cfg.appearance && cfg.appearance.theme) || 'light'; // 'light' | 'dark' | 'system'
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var resolved = (choice === 'system') ? (prefersDark ? 'dark' : 'light') : choice;
 
-                // Apply theme immediately
-                document.documentElement.setAttribute('data-theme', resolved);
+      // Apply theme immediately
+      document.documentElement.setAttribute('data-theme', resolved);
 
-                // Inline BG to prevent white flash
-                var bg = (resolved === 'dark') ? 'hsl(225, 28%, 7%)' : '#ffffff';
-                var style = document.createElement('style');
-                style.textContent = 'html,body{background:'+ bg +';}';
-                document.head.appendChild(style);
-            } catch (e) {}
-        })();
-    </script>
-    
+      // Inline BG to prevent white flash
+      var bg = (resolved === 'dark') ? 'hsl(225, 28%, 7%)' : '#ffffff';
+      var style = document.createElement('style');
+      style.textContent = 'html,body{background:'+ bg +';}';
+      document.head.appendChild(style);
+    } catch (e) {}
+  })();
+  </script>
     <title>Customer Service - Legend of Calicdan</title>
     <link rel="stylesheet" href="styles/theme.css">
     <link rel="stylesheet" href="styles/main.css">
@@ -87,9 +81,22 @@
                 </div>
                 
                 <div class="header-right">
-                    <div class="user-menu">
-                        <div class="user-avatar">U</div>
-                        <i data-lucide="chevron-down"></i>
+                    <!-- ✅ User dropdown menu -->
+                    <div class="user-dropdown" style="position: relative;">
+                        <button class="user-menu" id="userMenuButton" style="cursor: pointer; display: flex; align-items: center; gap: 8px; background: none; border: none; padding: 8px;">
+                            <div class="user-avatar">U</div>
+                            <i data-lucide="chevron-down"></i>
+                        </button>
+                        <!-- Dropdown content -->
+                        <div id="userDropdownMenu" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 8px; background: var(--bg-primary, #fff); border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 180px; z-index: 1000;">
+                            <div style="padding: 12px; border-bottom: 1px solid #eee;">
+                                <p id="userEmail" style="margin: 0; font-size: 13px; color: #666; font-weight: 500;"></p>
+                            </div>
+                            <button id="logoutButton" style="width: 100%; padding: 12px; text-align: left; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; color: #e33; font-weight: 500; transition: background 0.2s;">
+                                <i data-lucide="log-out" style="width: 16px; height: 16px;"></i>
+                                Logout
+                            </button>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -132,12 +139,12 @@
                                 <form id="supportForm" class="support-form">
                                     <div class="form-group">
                                         <label for="subject" class="form-label">Brief subject</label>
-                                        <input type="text" id="subject" name="subject" class="form-input" placeholder="Briefly describe your issue" required>
+                                        <input type="text" id="subject" class="form-input" placeholder="Briefly describe your issue" required>
                                     </div>
 
                                     <div class="form-group">
                                         <label for="description" class="form-label">Description</label>
-                                        <textarea id="description" name="description" class="form-textarea" placeholder="Add details to help us troubleshoot..." required></textarea>
+                                        <textarea id="description" class="form-textarea" placeholder="Add details to help us troubleshoot..." required></textarea>
                                     </div>
 
                                     <div class="form-group">
@@ -240,10 +247,47 @@
         </div>
     </div>
 
-    <!-- Scripts - Load in correct order -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="scripts/auth.js"></script>
     <script src="scripts/main.js"></script>
     <script src="scripts/customer-service.js"></script>
     <script src="scripts/spa-nav.js"></script>
+    <script>
+    // Dropdown logic for this page
+    document.addEventListener('DOMContentLoaded', function() {
+      const userMenuButton = document.getElementById('userMenuButton');
+      const userDropdownMenu = document.getElementById('userDropdownMenu');
+      const logoutButton = document.getElementById('logoutButton');
+      const userEmailDisplay = document.getElementById('userEmail');
+
+      if (window.AuthModule) {
+        const session = window.AuthModule.getSession();
+        if (session && session.email && userEmailDisplay) {
+          userEmailDisplay.textContent = session.email;
+        }
+      }
+
+      if (userMenuButton) {
+        userMenuButton.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const isVisible = userDropdownMenu.style.display === 'block';
+          userDropdownMenu.style.display = isVisible ? 'none' : 'block';
+          if (typeof lucide !== 'undefined') { try { lucide.createIcons(); } catch{} }
+        });
+      }
+
+      document.addEventListener('click', function(e) {
+        if (userDropdownMenu && userMenuButton && !userMenuButton.contains(e.target) && !userDropdownMenu.contains(e.target)) {
+          userDropdownMenu.style.display = 'none';
+        }
+      });
+
+      if (logoutButton) {
+        logoutButton.addEventListener('click', function() {
+          if (window.AuthModule) window.AuthModule.handleLogout();
+        });
+      }
+    });
+    </script>
 </body>
 </html>
