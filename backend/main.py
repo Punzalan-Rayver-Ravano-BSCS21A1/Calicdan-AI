@@ -33,19 +33,20 @@ async def lifespan(app: FastAPI):
     print("👋 Shutting down gracefully")
 
 
-origins = [
-    "http://127.0.0.1:5500",  # <-- your frontend origin
-    "http://localhost:5500"
-]
+# CORS configuration - Allow all localhost origins for development
+# This regex allows http://localhost:PORT or http://127.0.0.1:PORT on any port
+localhost_regex = r"https?://(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?$"
 
 app = FastAPI(lifespan=lifespan)
 
+# CORS middleware - allows any localhost origin for development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,   # can't use "*" when sending credentials
+    allow_origin_regex=localhost_regex,  # Allow any localhost on any port
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # -------------------------
@@ -402,7 +403,7 @@ async def call_deepseek_api(message: str, model: str) -> str:
             {"role": "user", "content": message}  # ✅ FIXED: Added missing quote
         ],
         "temperature": 0.7,
-        "max_tokens": 500
+        "max_tokens": 2000  # Increased from 500 to allow longer responses
     }
 
     for attempt in range(3):
