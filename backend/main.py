@@ -14,7 +14,11 @@ import re  # ✅ For email validation
 from fastapi import Depends
 import uuid
 from fastapi import Path
+<<<<<<< HEAD
 from typing import List, Optional
+=======
+
+>>>>>>> 8c70d7e746ab369a6c9a727f7e10e26425ff846e
 load_dotenv()
 
 
@@ -33,6 +37,7 @@ async def lifespan(app: FastAPI):
     print("👋 Shutting down gracefully")
 
 
+<<<<<<< HEAD
 origins = [
     "http://127.0.0.1:5500",  # <-- your frontend origin
     "http://localhost:5500"
@@ -46,6 +51,22 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+=======
+# CORS configuration - Allow all localhost origins for development
+# This regex allows http://localhost:PORT or http://127.0.0.1:PORT on any port
+localhost_regex = r"https?://(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?$"
+
+app = FastAPI(lifespan=lifespan)
+
+# CORS middleware - allows any localhost origin for development
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=localhost_regex,  # Allow any localhost on any port
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_headers=["*"],
+    expose_headers=["*"],
+>>>>>>> 8c70d7e746ab369a6c9a727f7e10e26425ff846e
 )
 # ------------------------
 # Batch chat Pydantic model
@@ -415,7 +436,7 @@ async def call_deepseek_api(message: str, model: str) -> str:
             {"role": "user", "content": message}  # ✅ FIXED: Added missing quote
         ],
         "temperature": 0.7,
-        "max_tokens": 500
+        "max_tokens": 2000  # Increased from 500 to allow longer responses
     }
 
     for attempt in range(3):
@@ -637,6 +658,7 @@ async def new_chat_session(Authorization: str = Header(None)):
 
     return {"session_id": session_id, "message": "New chat session created ✅"}
 
+<<<<<<< HEAD
 # ------------------------
 # Batch chat endpoint
 # ------------------------
@@ -680,6 +702,9 @@ async def chat_batch_endpoint(request: BatchChatRequest):
         if cur: cur.close()
         if conn: return_connection(conn)
         
+=======
+
+>>>>>>> 8c70d7e746ab369a6c9a727f7e10e26425ff846e
 from fastapi import Path, Header, HTTPException
 
 

@@ -77,6 +77,7 @@ let currentTagFilter = 'all';
 document.addEventListener('DOMContentLoaded', initializeHistory);
 
 async function initializeHistory() {
+<<<<<<< HEAD
     let localThreads = getUserChatHistory();
     const backendThreads = await fetchChatSessionsFromBackend();
 
@@ -99,6 +100,14 @@ async function initializeHistory() {
     chatSessions = deriveSessionsFromMessages(mergedThreads);
 
     // Rest of initialization
+=======
+    let threads = getUserChatHistory(); // fallback localStorage
+    const backendThreads = await fetchChatSessionsFromBackend();
+    if (backendThreads.length > 0) threads = backendThreads;
+
+    chatSessions = deriveSessionsFromMessages(threads);
+
+>>>>>>> 8c70d7e746ab369a6c9a727f7e10e26425ff846e
     const searchInput = document.getElementById('searchInput');
     searchInput.addEventListener('input', function() {
         currentSearchQuery = this.value.toLowerCase();
@@ -123,7 +132,10 @@ async function initializeHistory() {
     attachSessionCardClickListener();
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 8c70d7e746ab369a6c9a727f7e10e26425ff846e
 function updateDateFilterText(value) {
     const dateFilter = document.getElementById('dateFilter');
     const textMap = {
@@ -206,6 +218,7 @@ function renderSessions(sessions) {
                         <i data-lucide="more-horizontal"></i>
                     </button>
                     <div class="dropdown-menu">
+<<<<<<< HEAD
                         <button class="dropdown-item" data-action="rename">
                             <i data-lucide="edit-2"></i>Rename
                         </button>
@@ -215,6 +228,11 @@ function renderSessions(sessions) {
                         <button class="dropdown-item" data-action="export">
                             <i data-lucide="download"></i>Export
                         </button>
+=======
+                        <button class="dropdown-item" data-action="rename">Rename</button>
+                        <button class="dropdown-item" data-action="duplicate">Duplicate</button>
+                        <button class="dropdown-item" data-action="export">Export</button>
+>>>>>>> 8c70d7e746ab369a6c9a727f7e10e26425ff846e
                         <button class="dropdown-item text-destructive" data-action="delete" data-session-id="${session.id}">
                             <i data-lucide="trash-2"></i>Delete
                         </button>
@@ -469,6 +487,7 @@ function showModal({ title, message, inputValue, onConfirm }) {
 function renameSession(sessionId) {
     const session = chatSessions.find(s => s.id === sessionId);
     if (!session) return;
+<<<<<<< HEAD
 
     showModal({
         title: 'Rename Conversation',
@@ -503,6 +522,22 @@ function setCustomChatTitle(sessionId, newTitle) {
     if (window.AppUtils) window.AppUtils.showNotification('Conversation renamed', 'success');
 }
 
+=======
+
+    showModal({
+        title: 'Rename Conversation',
+        message: 'Enter a new title:',
+        inputValue: session.title,
+        onConfirm: (newName) => {
+            if (!newName) return;
+            session.title = newName.slice(0, 40);
+            updateLocalStorage();
+            filterAndRenderSessions();
+            if (window.AppUtils) window.AppUtils.showNotification('Conversation renamed', 'success');
+        }
+    });
+}
+>>>>>>> 8c70d7e746ab369a6c9a727f7e10e26425ff846e
 
 function updateLocalStorage() {
     const userId = getUserIdForHistory();

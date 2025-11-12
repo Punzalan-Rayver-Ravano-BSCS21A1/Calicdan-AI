@@ -616,8 +616,13 @@ body {
     flex-direction: column;
     gap: 6px;
     border-radius: 18px;
-    padding: 10px 12px;
+    padding: 12px 16px 12px 20px;
     box-shadow: var(--shadow-soft);
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: visible;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .message.assistant-message .message-bubble {
@@ -631,12 +636,21 @@ body {
 }
 
 .message-content p {
-    margin: 0;
-    line-height: 1.45;
+    margin: 0.5em 0;
+    line-height: 1.6;
     word-wrap: break-word;
     overflow-wrap: break-word;
     white-space: pre-wrap;
     hyphens: auto;
+    box-sizing: border-box;
+}
+
+.message-content p:first-child {
+    margin-top: 0;
+}
+
+.message-content p:last-child {
+    margin-bottom: 0;
 }
 
 .message-meta {
@@ -1737,4 +1751,199 @@ html[data-theme="dark"] .auth-box input {
     border-radius: var(--radius);
     border: 1px solid var(--border);
     font-size: 1rem;
+<<<<<<< HEAD
 }
+=======
+}
+
+/* --- Chat message alignment fix --- */
+
+/* Ensure lists and text stay inside the chat bubble */
+.message-bubble {
+  overflow-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+  overflow-x: hidden;
+  overflow-y: visible;
+  box-sizing: border-box;
+  min-height: 0;
+}
+
+/* Message content container - ensures all content stays within bubble */
+.message-content {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  overflow-x: hidden;
+  overflow-y: visible;
+  position: relative;
+  display: block;
+  min-height: 0;
+  text-align: left;
+}
+
+/* Base list styling - ensures bullets/numbers stay inside */
+.message-content ul,
+.message-content ol {
+  margin: 0.5em 0;
+  padding-left: 1.75em;
+  padding-right: 0.5em;
+  margin-left: 0;
+  margin-right: 0;
+  list-style-position: outside;
+  overflow-wrap: break-word;
+  min-width: 0;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* List items - proper spacing and alignment */
+.message-content li {
+  margin: 0.3em 0;
+  padding-left: 0.25em;
+  padding-right: 0;
+  line-height: 1.6;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  list-style-position: outside;
+  display: list-item;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* Nested lists inside list items (e.g., bullets inside numbered lists) */
+.message-content li > ul,
+.message-content li > ol {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  margin-left: 0;
+  padding-left: 1.75em;
+  padding-right: 0.5em;
+  list-style-position: outside;
+}
+
+/* Deeply nested lists */
+.message-content ul ul,
+.message-content ol ol,
+.message-content ul ol,
+.message-content ol ul {
+  margin-top: 0.3em;
+  margin-bottom: 0.3em;
+  margin-left: 0;
+  padding-left: 1.75em;
+  padding-right: 0.5em;
+  list-style-position: outside;
+}
+
+/* Bold text within lists - ensures no alignment shift */
+.message-content li strong,
+.message-content li b {
+  font-weight: 600;
+  display: inline;
+  line-height: inherit;
+  white-space: normal;
+}
+
+/* Bold and italic text - consistent display */
+.message-content strong,
+.message-content b,
+.message-content em,
+.message-content i {
+  line-height: inherit;
+  display: inline;
+  white-space: normal;
+  font-weight: inherit;
+}
+
+.message-content strong,
+.message-content b {
+  font-weight: 600;
+}
+
+.message-content em,
+.message-content i {
+  font-style: italic;
+}
+
+/* Paragraphs - consistent spacing */
+.message-content p {
+  margin: 0.5em 0;
+  line-height: 1.7;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.message-content p:first-child {
+  margin-top: 0;
+}
+
+.message-content p:last-child {
+  margin-bottom: 0;
+}
+
+
+/* Code snippets - proper alignment */
+.message-content code {
+  background: var(--bg-code, rgba(0,0,0,0.05));
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  white-space: pre-wrap;
+  font-size: 0.9em;
+  display: inline;
+  line-height: inherit;
+  box-sizing: border-box;
+}
+
+.message-content pre {
+  margin: 0.5em 0;
+  padding: 0.75em;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 0.5em;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+.message-content pre code {
+  background-color: transparent;
+  padding: 0;
+  display: block;
+}
+
+/* Headings if present in markdown */
+.message-content h1,
+.message-content h2,
+.message-content h3,
+.message-content h4,
+.message-content h5,
+.message-content h6 {
+  margin: 0.75em 0 0.5em 0;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.message-content h1:first-child,
+.message-content h2:first-child,
+.message-content h3:first-child {
+  margin-top: 0;
+}
+
+/* Line breaks and spacing */
+.message-content br {
+  line-height: 1.6;
+}
+
+/* Prevent overflow from any element */
+.message-content * {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  box-sizing: border-box;
+}
+
+
+>>>>>>> 8c70d7e746ab369a6c9a727f7e10e26425ff846e

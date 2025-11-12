@@ -101,6 +101,7 @@ async function loadHistory() {
         // Filter out empty or cleared sessions
         sessions = sessions.filter(s => s.messages && s.messages.length > 0 && !s.cleared);
 
+<<<<<<< HEAD
         // Ensure every session has a title based on first user message
       sessions = sessions.map(s => {
         if (!s.title && s.messages && s.messages.length > 0) {
@@ -111,6 +112,8 @@ async function loadHistory() {
       });
 
 
+=======
+>>>>>>> 8c70d7e746ab369a6c9a727f7e10e26425ff846e
         if (sessions.length === 0) {
             // No sessions with messages
             currentSessionId = null;
@@ -157,7 +160,11 @@ async function loadHistory() {
                 });
             });
         }
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> 8c70d7e746ab369a6c9a727f7e10e26425ff846e
         // Save sessions to localStorage for history/session cards
         const userId = getUserIdForHistory();
         const threadsKey = 'chatThreads_user_' + userId;
@@ -175,7 +182,10 @@ async function loadHistory() {
         }];
         currentSessionId = null;
         renderMessages(true);
+<<<<<<< HEAD
         updateChatHeader(currentSessionId, messages);
+=======
+>>>>>>> 8c70d7e746ab369a6c9a727f7e10e26425ff846e
     }
 }
 
@@ -204,6 +214,24 @@ async function clearChatDB() {
     if (!response.ok) {
       const text = await response.text();
       console.error("Failed to clear session messages:", response.status, text);
+<<<<<<< HEAD
+      return;
+    }
+
+    console.log("Session messages cleared successfully ✅");
+
+    // ✅ Remove from active session tracking
+    const userId = getUserIdForHistory();
+    localStorage.removeItem(`calicdan-activeSession_user_${userId}`);
+
+    // ✅ Update sidebar thread list (remove this session)
+    const threadKey = `chatThreads_user_${userId}`;
+    let threads = JSON.parse(localStorage.getItem(threadKey) || "[]");
+    threads = threads.filter(t => t.id !== currentSessionId);
+    localStorage.setItem(threadKey, JSON.stringify(threads));
+
+    // ✅ Reset current chat to a clean welcome state
+=======
       return;
     }
 
@@ -228,6 +256,116 @@ async function clearChatDB() {
       archived: true
     }];
 
+    currentSessionId = null;
+    renderMessages(true);
+
+    const messageInput = document.getElementById("messageInput");
+    if (messageInput) messageInput.focus();
+
+    const sendButton = document.getElementById("sendButton");
+    if (sendButton) sendButton.disabled = true;
+
+  } catch (err) {
+    console.error("Could not clear session messages (network or code error):", err);
+  }
+}
+
+// ---- Archive current conversation (DB-backed) ----
+async function archiveCurrentConversation() {
+  const session = getSession();
+  if (!session || !session.session_token) return false;
+
+  if (!currentSessionId || messages.length === 0) return true;
+
+  try {
+    // Only send messages that haven't been archived yet
+    // We'll use a `archived` flag on each message
+    const newMessages = messages.filter(m => !m.archived);
+    if (newMessages.length === 0) return true;
+
+    for (const m of newMessages) {
+      const payload = {
+        message: m.content,
+        sender: (m.sender === "assistant") ? "ai" : "user",  // ✅ FIX: correct identity
+        session_token: session.session_token,
+        session_id: currentSessionId,
+        attachmentUrl: m.attachmentUrl || null,
+        attachmentName: m.attachmentName || null
+      };
+
+      const resp = await fetch(`${window.AuthModule.BACKEND_URL}/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!resp.ok) {
+        const text = await resp.text();
+        console.error("Failed to archive message:", text);
+        return false;
+      }
+
+      // Mark message as archived so it won't be sent again
+      m.archived = true;
+    }
+
+    console.log("All new messages archived successfully ✅");
+    return true;
+
+  } catch (err) {
+    console.error("Error saving conversation to backend:", err);
+    return false;
+  }
+}
+
+
+// ---- Start a new chat session (DB-backed) ----
+async function startNewChat() {
+  const session = getSession();
+  if (!session || !session.session_token) return;
+
+  localStorage.removeItem(`calicdan-activeSession_user_${getUserIdForHistory()}`);
+
+  // Archive current session first
+  if (currentSessionId && messages.length > 0) {
+    const success = await archiveCurrentConversation();
+    if (!success) {
+      messages = [{
+        id: Date.now().toString(),
+        content: "⚠️ Could not archive previous session. Try again later.",
+        sender: "assistant",
+        timestamp: new Date().toISOString(),
+      }];
+      renderMessages(true);
+      return;
+    }
+  }
+
+  try {
+    // Create new session in backend
+    const resp = await fetch(`${window.AuthModule.BACKEND_URL}/chat/new-session`, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${session.session_token}` }
+    });
+
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.detail || "Failed to start new session");
+
+    currentSessionId = data.session_id;
+
+    // Initialize new chat message list
+>>>>>>> 8c70d7e746ab369a6c9a727f7e10e26425ff846e
+    messages = [{
+      id: Date.now().toString(),
+      content: "👋 I'm Calicdan, Your Messiah Assistant! How can I assist you?",
+      sender: "assistant",
+      timestamp: new Date().toISOString(),
+      archived: true
+    }];
+
+<<<<<<< HEAD
     currentSessionId = null;
     renderMessages(true);
     updateChatHeader(null, [], { cleared: true });
@@ -311,6 +449,32 @@ async function startNewChat() {
     renderMessages(true);
 
     // ✅ Focus input & disable send until user types
+=======
+    
+
+    // ✅ Update ACTIVE session storage
+    const userId = getUserIdForHistory();
+    const activeKey = `calicdan-activeSession_user_${userId}`;
+    localStorage.setItem(activeKey, JSON.stringify({
+      sessionId: currentSessionId,
+      messages: messages
+    }));
+
+    // ✅ Update session thread list for sidebar/history UI
+    const threadKey = `chatThreads_user_${userId}`;
+    let threads = JSON.parse(localStorage.getItem(threadKey) || "[]");
+    threads.unshift({
+      id: currentSessionId,
+      messages: messages,
+      endedAt: Date.now()
+    });
+    localStorage.setItem(threadKey, JSON.stringify(threads));
+
+    // Refresh displayed messages
+    renderMessages(true);
+
+    // ✅ Your UI restore logic stays here
+>>>>>>> 8c70d7e746ab369a6c9a727f7e10e26425ff846e
     const messageInput = document.getElementById("messageInput");
     if (messageInput) messageInput.focus();
 
@@ -326,6 +490,7 @@ async function startNewChat() {
       sender: "assistant",
       timestamp: new Date().toISOString(),
     }];
+<<<<<<< HEAD
 
     renderMessages(true);
     updateChatHeader(null, [], {}); // fallback
@@ -394,12 +559,22 @@ async function archiveCurrentConversationBatch(sessionId, allMessages) {
   } catch (err) {
     console.error("⚠️ Archive batch error:", err);
     return false;
+=======
+
+    renderMessages(true);
+>>>>>>> 8c70d7e746ab369a6c9a727f7e10e26425ff846e
   }
 }
 
 
 const clearButton = document.getElementById("clearChat");
 const newChatButton = document.getElementById("newChat");
+<<<<<<< HEAD
+=======
+
+if (clearButton) clearButton.addEventListener("click", clearChatDB);
+if (newChatButton) newChatButton.addEventListener("click", startNewChat);
+>>>>>>> 8c70d7e746ab369a6c9a727f7e10e26425ff846e
 
 if (clearButton) clearButton.addEventListener("click", clearChatDB);
 if (newChatButton) newChatButton.addEventListener("click", startNewChat);
@@ -607,6 +782,7 @@ async function onAttachmentSelected(e) {
 // ---- Send message ----
 async function handleSendMessage() {
   const messageInput = document.getElementById("messageInput");
+  console.log("Send button clicked. Value:", messageInput.value);
   const inputValue = messageInput.value.trim();
   if (!inputValue) return;
 
@@ -617,7 +793,11 @@ async function handleSendMessage() {
     return;
   }
 
+<<<<<<< HEAD
   // Create user message
+=======
+  // Add user's message locally
+>>>>>>> 8c70d7e746ab369a6c9a727f7e10e26425ff846e
   const userMessage = {
     id: Date.now().toString(),
     content: inputValue,
@@ -627,15 +807,21 @@ async function handleSendMessage() {
   };
   messages.push(userMessage);
 
+<<<<<<< HEAD
   // Clear input & disable send button
   messageInput.value = "";
   document.getElementById("sendButton").disabled = true;
 
   // Render user message and show typing indicator
+=======
+  messageInput.value = "";
+  document.getElementById("sendButton").disabled = true;
+>>>>>>> 8c70d7e746ab369a6c9a727f7e10e26425ff846e
   renderMessages();
   showTypingIndicator();
 
   try {
+<<<<<<< HEAD
     // Send message to backend
     const resp = await fetch(`${window.AuthModule.BACKEND_URL}/chat`, {
       method: "POST",
@@ -644,18 +830,37 @@ async function handleSendMessage() {
         message: inputValue,
         session_token: session.session_token,
         session_id: currentSessionId
+=======
+    const response = await fetch(`${window.AuthModule.BACKEND_URL}/chat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: inputValue,
+        session_token: session.session_token,
+        session_id: currentSessionId // can be null for new session
+>>>>>>> 8c70d7e746ab369a6c9a727f7e10e26425ff846e
       }),
     });
 
     const data = await resp.json();
     hideTypingIndicator();
 
+<<<<<<< HEAD
     if (!resp.ok) throw new Error(data.detail || "Unknown backend error");
 
     // Update session ID from backend if needed
     currentSessionId = data.session_id || currentSessionId;
 
     // Add AI reply
+=======
+    if (!response.ok) throw new Error(data.detail || "Unknown backend error");
+
+    currentSessionId = data.session_id || currentSessionId;
+
+    // Add AI reply locally
+>>>>>>> 8c70d7e746ab369a6c9a727f7e10e26425ff846e
     const aiMessage = {
       id: (Date.now() + 1).toString(),
       content: data.reply || "⚠️ No reply from AI.",
@@ -664,6 +869,7 @@ async function handleSendMessage() {
       archived: false
     };
     messages.push(aiMessage);
+<<<<<<< HEAD
 
     renderMessages();
 
@@ -671,6 +877,10 @@ async function handleSendMessage() {
     updateChatHeader(currentSessionId, messages);
     saveThreadStatus(currentSessionId, messages);
 
+=======
+    renderMessages();
+
+>>>>>>> 8c70d7e746ab369a6c9a727f7e10e26425ff846e
   } catch (error) {
     hideTypingIndicator();
     const errorMessage = {
@@ -685,6 +895,7 @@ async function handleSendMessage() {
   }
 }
 
+<<<<<<< HEAD
 // ✅ Save session status to localStorage (Active / Archived / Draft)
 function saveThreadStatus(sessionId, messages) {
   const userId = getUserIdForHistory();
@@ -719,6 +930,8 @@ function saveThreadStatus(sessionId, messages) {
 }
 
 
+=======
+>>>>>>> 8c70d7e746ab369a6c9a727f7e10e26425ff846e
 // ---- Render messages ----
 function renderMessages(scrollHard = false) {
   const chatMessages = document.getElementById("chatMessages");
