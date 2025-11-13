@@ -648,14 +648,27 @@ authSubmit.addEventListener("click", async () => {
   }
 });
 
-// ✅ Google OAuth login (placeholder - requires Google OAuth setup)
 googleLoginBtn.addEventListener("click", () => {
-  errorMsg.textContent = "Google OAuth is coming soon! Please use email/password login for now.";
-  errorMsg.style.display = "block";
+  // Hide previous error/success
+  errorMsg.style.display = "none";
+  successMsg.style.display = "none";
+
+  // 👇 Replace this with your own Client ID
+  const clientId = "530881158509-geg690fkubhh7inoifhj00slavll4mi1.apps.googleusercontent.com";
   
-  // TODO: Implement Google OAuth flow
-  // window.location.href = "http://127.0.0.1:8000/auth/google";
+  // Redirect URI — must match what you set in Google Cloud
+  const redirectUri = "http://127.0.0.1:5500/chat.html";
+
+  // Scopes: what info we want (email, profile)
+  const scope = encodeURIComponent("openid email profile");
+
+  // Build Google OAuth URL
+  const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=${scope}&include_granted_scopes=true`;
+
+  // Redirect the user to Google Sign-In
+  window.location.href = oauthUrl;
 });
+
 
 // ✅ User dropdown functionality
 document.addEventListener('DOMContentLoaded', function() {

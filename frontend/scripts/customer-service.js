@@ -36,7 +36,6 @@ function initializeCustomerService() {
     fileUpload.addEventListener('drop', function(e) {
         e.preventDefault();
         this.classList.remove('drag-over');
-        
         const files = Array.from(e.dataTransfer.files);
         handleFiles(files);
     });
@@ -73,16 +72,12 @@ async function handleFormSubmit(e) {
     
     // Validate form
     if (!subject.trim()) {
-        if (window.AppUtils) {
-            window.AppUtils.showNotification('Please enter a brief subject', 'error');
-        }
+        if (window.AppUtils) window.AppUtils.showNotification('Please enter a brief subject', 'error');
         return;
     }
     
     if (!description.trim()) {
-        if (window.AppUtils) {
-            window.AppUtils.showNotification('Please provide a description of your issue', 'error');
-        }
+        if (window.AppUtils) window.AppUtils.showNotification('Please provide a description of your issue', 'error');
         return;
     }
     
@@ -96,43 +91,33 @@ async function handleFormSubmit(e) {
     
     console.log('Support ticket submitted:', ticketData);
     
-    // Show loading state
-    if (window.AppUtils) {
-        window.AppUtils.showNotification('Sending support ticket...', 'info');
-    }
+    if (window.AppUtils) window.AppUtils.showNotification('Sending support ticket...', 'info');
     
-    // Send email and handle response
     const emailSent = await sendEmail(ticketData);
     
     if (emailSent) {
-        // Show success message
-        if (window.AppUtils) {
-            window.AppUtils.showNotification('Support ticket submitted successfully! We\'ll get back to you soon.', 'success');
-        }
-        
-        // Reset form
+        if (window.AppUtils) window.AppUtils.showNotification('Support ticket submitted successfully! We\'ll get back to you soon.', 'success');
         resetForm();
     } else {
-        // Show error message
-        if (window.AppUtils) {
-            window.AppUtils.showNotification('Failed to submit support ticket. Please try again.', 'error');
-        }
+        if (window.AppUtils) window.AppUtils.showNotification('Failed to submit support ticket. Please try again.', 'error');
     }
 }
 
 /**
- * Main email sending function
- * @param {Object} ticketData - The support ticket data
- * @returns {Promise<boolean>} - Returns true if email sent successfully, false otherwise
+ * Main email sending function using EmailJS
+ * Supports actual file attachments in base64 format
  */
 async function sendEmail(ticketData) {
     const { subject, description, attachments } = ticketData;
-    
-    // EmailJS configuration
+
     const serviceID = 'service_ri53pum';
     const templateID = 'template_vyqyw3v';
-    
-    // Prepare template parameters
+
+    // Convert attachments to base64 strings
+    const base64Attachments = await Promise.all(
+        attachments.map(file => fileToBase64(file))
+    );
+
     const templateParams = {
         from_name: 'Customer Support Form',
         subject: subject,
@@ -140,38 +125,48 @@ async function sendEmail(ticketData) {
         description: description,
         timestamp: new Date().toLocaleString(),
         attachments_count: attachments.length,
-        attachments_list: attachments.length > 0 
-            ? attachments.map(f => `${f.name} (${(f.size / 1024).toFixed(2)} KB)`).join(', ')
+        attachments_list: attachments.length > 0
+            ? attachments.map(f => f.name).join(', ')
             : 'No attachments',
-        reply_to: 'noreply@calicdan.com'
+        reply_to: 'noreply@calicdan.com',
+        attachments: base64Attachments // EmailJS template must support attachments field
     };
-    
+
     try {
-        // Check if EmailJS is loaded
         if (typeof emailjs === 'undefined') {
             console.error('EmailJS library not loaded');
             return false;
         }
-        
-        // Send email using EmailJS
+
+        // Initialize EmailJS with your public key
+        if (!emailjs.init) emailjs.init('YOUR_PUBLIC_KEY_HERE'); // replace with your public key
+
         const response = await emailjs.send(serviceID, templateID, templateParams);
-        
-        // Check response status
+
         if (response.status === 200) {
             console.log('Email sent successfully:', response);
             return true;
         } else {
-            console.error('Email sending failed with status:', response.status);
+            console.error('Email sending failed with status:', response.status, response.text);
             return false;
         }
-        
     } catch (error) {
         console.error('EmailJS error:', error);
         return false;
     }
 }
 
-// File handling functions
+// Convert File to base64
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve({ name: file.name, data: reader.result });
+        reader.onerror = error => reject(error);
+    });
+}
+
+// File handling
 function handleFileSelect(e) {
     const files = Array.from(e.target.files);
     handleFiles(files);
@@ -186,47 +181,34 @@ function handleFiles(files) {
         'application/msword',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     ];
-    
+
     files.forEach(file => {
-        // Check file size
         if (file.size > maxFileSize) {
-            if (window.AppUtils) {
-                window.AppUtils.showNotification(`File "${file.name}" is too large. Maximum size is 10MB.`, 'error');
-            }
+            if (window.AppUtils) window.AppUtils.showNotification(`File "${file.name}" is too large. Maximum size is 10MB.`, 'error');
             return;
         }
-        
-        // Check file type
         if (!allowedTypes.includes(file.type)) {
-            if (window.AppUtils) {
-                window.AppUtils.showNotification(`File type not allowed: "${file.name}"`, 'error');
-            }
+            if (window.AppUtils) window.AppUtils.showNotification(`File type not allowed: "${file.name}"`, 'error');
             return;
         }
-        
-        // Check if file already exists
         if (attachedFiles.some(f => f.name === file.name && f.size === file.size)) {
-            if (window.AppUtils) {
-                window.AppUtils.showNotification(`File "${file.name}" is already attached`, 'error');
-            }
+            if (window.AppUtils) window.AppUtils.showNotification(`File "${file.name}" is already attached`, 'error');
             return;
         }
-        
-        // Add file to attached files
         attachedFiles.push(file);
     });
-    
+
     renderAttachedFiles();
 }
 
 function renderAttachedFiles() {
     const fileList = document.getElementById('fileList');
-    
+
     if (attachedFiles.length === 0) {
         fileList.innerHTML = '';
         return;
     }
-    
+
     fileList.innerHTML = attachedFiles.map((file, index) => `
         <div class="file-item">
             <span class="file-name" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</span>
@@ -240,10 +222,7 @@ function renderAttachedFiles() {
 function removeFile(index) {
     attachedFiles.splice(index, 1);
     renderAttachedFiles();
-    
-    // Clear the file input
-    const fileInput = document.getElementById('fileInput');
-    fileInput.value = '';
+    document.getElementById('fileInput').value = '';
 }
 
 function resetForm() {
@@ -251,22 +230,12 @@ function resetForm() {
     document.getElementById('description').value = '';
     attachedFiles = [];
     renderAttachedFiles();
-    
-    // Clear the file input
-    const fileInput = document.getElementById('fileInput');
-    fileInput.value = '';
+    document.getElementById('fileInput').value = '';
 }
 
 function escapeHtml(text) {
-    const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
-    };
-    return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return text.replace(/[&<>"']/g, m => map[m]);
 }
 
-// Make removeFile function globally available
 window.removeFile = removeFile;

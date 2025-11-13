@@ -7,7 +7,7 @@ import psycopg2
 
 router = APIRouter()
 
-GOOGLE_CLIENT_ID = "530881158509-8a6u8us164cvqolnnqn9qf7j7g10geii.apps.googleusercontent.com"
+GOOGLE_CLIENT_ID = "530881158509-geg690fkubhh7inoifhj00slavll4mi1.apps.googleusercontent.com"
 
 
 # --- SIGN UP ---
