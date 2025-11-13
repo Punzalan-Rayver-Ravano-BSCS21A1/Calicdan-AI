@@ -1,7 +1,9 @@
 // scripts/auth.js
 // Handles authentication, session management, and logout functionality
+// Now includes Google OAuth integration
 
 const BACKEND_URL = "http://127.0.0.1:8000";
+const GOOGLE_CLIENT_ID = "530881158509-8a6u8us164cvqolnnqn9qf7j7g10geii.apps.googleusercontent.com"; // ⚠️ Replace with your actual client ID
 
 // ✅ Get current session data from localStorage
 function getSession() {
@@ -49,9 +51,127 @@ function isValidEmail(email) {
   return pattern.test(email);
 }
 
+// ========================================
+// GOOGLE OAUTH FUNCTIONS
+// ========================================
+
+// ✅ Initialize Google Sign-In
+function initGoogleSignIn() {
+  // Check if we're on a page that needs Google Sign-In
+  const googleBtnContainer = document.getElementById('google-signin-btn');
+  if (!googleBtnContainer) return;
+
+  // Load Google Identity Services library
+  if (typeof google === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = setupGoogleButton;
+    document.head.appendChild(script);
+  } else {
+    setupGoogleButton();
+  }
+}
+
+// ✅ Setup Google Sign-In button
+function setupGoogleButton() {
+  const googleBtnContainer = document.getElementById('google-signin-btn');
+  
+  if (!googleBtnContainer) return;
+
+  try {
+    // Initialize Google Identity Services
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleGoogleCallback,
+      auto_select: false,
+      cancel_on_tap_outside: true
+    });
+
+    // Render the button
+    google.accounts.id.renderButton(
+      googleBtnContainer,
+      {
+        theme: 'outline',
+        size: 'large',
+        width: googleBtnContainer.offsetWidth || 280,
+        text: 'signin_with',
+        shape: 'rectangular',
+        logo_alignment: 'left'
+      }
+    );
+
+    console.log('✅ Google Sign-In button initialized');
+  } catch (error) {
+    console.error('❌ Error setting up Google Sign-In:', error);
+  }
+}
+
+// ✅ Handle Google OAuth callback
+async function handleGoogleCallback(response) {
+  try {
+    const idToken = response.credential;
+
+    // Show loading notification
+    if (window.AppUtils && window.AppUtils.showNotification) {
+      window.AppUtils.showNotification("Signing in with Google...", "info");
+    }
+
+    // Send token to backend for verification
+    const backendResponse = await fetch(`${BACKEND_URL}/auth/google`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ token: idToken })
+    });
+
+    const data = await backendResponse.json();
+
+    if (backendResponse.ok && data.session_token) {
+      // Save session data
+      saveSession({
+        session_token: data.session_token,
+        user_id: data.user_id,
+        email: data.email,
+        auth_provider: 'google'
+      });
+
+      console.log('✅ Google sign-in successful:', data.email);
+
+      // Show success notification
+      if (window.AppUtils && window.AppUtils.showNotification) {
+        window.AppUtils.showNotification("Successfully signed in with Google!", "success");
+      }
+
+      // Redirect to chat page
+      setTimeout(() => {
+        window.location.href = "chat.html";
+      }, 500);
+    } else {
+      throw new Error(data.error || data.detail || "Google sign-in failed");
+    }
+  } catch (error) {
+    console.error("❌ Google sign-in error:", error);
+    
+    if (window.AppUtils && window.AppUtils.showNotification) {
+      window.AppUtils.showNotification(
+        error.message || "Failed to sign in with Google. Please try again.",
+        "error"
+      );
+    }
+  }
+}
+
+// ========================================
+// LOGOUT FUNCTION (Enhanced with Google)
+// ========================================
+
 // ✅ Handle logout - clears session on both frontend AND backend
 async function handleLogout() {
   const sessionToken = getSessionToken();
+  const session = getSession();
   
   if (!sessionToken) {
     clearSession();
@@ -73,6 +193,16 @@ async function handleLogout() {
       console.log("✅ Logout successful on backend");
     } else {
       console.warn("⚠️ Backend logout failed, clearing local session anyway");
+    }
+
+    // If logged in via Google, sign out from Google as well
+    if (session && session.auth_provider === 'google' && typeof google !== 'undefined') {
+      try {
+        google.accounts.id.disableAutoSelect();
+        console.log("✅ Google sign-out successful");
+      } catch (error) {
+        console.warn("⚠️ Google sign-out error:", error);
+      }
     }
   } catch (error) {
     console.error("❌ Logout error:", error);
@@ -140,10 +270,16 @@ function initAuthUI() {
 }
 
 // ✅ Initialize on page load
-document.addEventListener("DOMContentLoaded", initAuthUI);
+document.addEventListener("DOMContentLoaded", () => {
+  initAuthUI();
+  initGoogleSignIn();
+});
 
 // ✅ Re-initialize after soft navigation
-document.addEventListener("soft:navigated", initAuthUI);
+document.addEventListener("soft:navigated", () => {
+  initAuthUI();
+  initGoogleSignIn();
+});
 
 // ✅ Export functions for use in other scripts
 window.AuthModule = {
@@ -158,5 +294,8 @@ window.AuthModule = {
   requireAuth,
   redirectIfLoggedIn,
   initAuthUI,
-  BACKEND_URL
+  initGoogleSignIn,
+  handleGoogleCallback,
+  BACKEND_URL,
+  GOOGLE_CLIENT_ID
 };

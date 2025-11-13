@@ -87,9 +87,10 @@
             </button>
             
             <!-- Dropdown content -->
-            <div id="userDropdownMenu" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 8px; background: var(--bg-primary, #fff); border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 180px; z-index: 1000;">
+            <div id="userDropdownMenu" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 8px; background: var(--bg-primary, #fff); border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 200px; z-index: 1000;">
               <div style="padding: 12px; border-bottom: 1px solid #eee;">
                 <p id="userEmail" style="margin: 0; font-size: 13px; color: #666; font-weight: 500;"></p>
+                <p id="authProvider" style="margin: 4px 0 0 0; font-size: 11px; color: #999;"></p>
               </div>
               <button id="logoutButton" style="width: 100%; padding: 12px; text-align: left; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; color: #e33; font-weight: 500; transition: background 0.2s;">
                 <i data-lucide="log-out" style="width: 16px; height: 16px;"></i>
@@ -220,17 +221,27 @@
   <script src="scripts/spa-nav.js"></script>
 
 <script>
+// ✅ Require authentication before showing chat page
+if (window.AuthModule && !window.AuthModule.requireAuth()) {
+  // User will be redirected to login page
+}
+
 // ✅ User dropdown functionality for chat page
 const userMenuButton = document.getElementById('userMenuButton');
 const userDropdownMenu = document.getElementById('userDropdownMenu');
 const logoutButton = document.getElementById('logoutButton');
 const userEmailDisplay = document.getElementById('userEmail');
+const authProviderDisplay = document.getElementById('authProvider');
 
-// Update email display
+// Update email display and auth provider
 if (window.AuthModule) {
   const session = window.AuthModule.getSession();
   if (session && session.email) {
     userEmailDisplay.textContent = session.email;
+    
+    // Show auth provider (Google or Email)
+    const provider = session.auth_provider || 'email';
+    authProviderDisplay.textContent = provider === 'google' ? '🔗 Signed in with Google' : '📧 Email account';
     
     // Update avatar
     const avatar = document.querySelector('.user-avatar');
