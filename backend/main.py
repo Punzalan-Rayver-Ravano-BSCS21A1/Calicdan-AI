@@ -5,12 +5,12 @@ import os, requests, time, psycopg2
 from dotenv import load_dotenv
 from database import (
     get_connection, return_connection, initialize_pool, close_pool,
-    hash_password, verify_password  # ✅ Import password functions
+    hash_password, verify_password
 )
 from contextlib import asynccontextmanager
-import secrets  # ✅ For generating session tokens
+import secrets
 from datetime import datetime, timedelta
-import re  # ✅ For email validation
+import re
 from fastapi import Depends
 import uuid
 from fastapi import Path
@@ -34,7 +34,7 @@ async def lifespan(app: FastAPI):
 
 
 origins = [
-    "http://127.0.0.1:5500",  # <-- your frontend origin
+    "http://127.0.0.1:5500",
     "http://localhost:5500"
 ]
 
@@ -42,17 +42,18 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,   # can't use "*" when sending credentials
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 # ------------------------
 # Batch chat Pydantic model
 # ------------------------
 class BatchChatMessage(BaseModel):
     message: str
-    sender: str  # "user" or "ai"
+    sender: str
     attachmentUrl: Optional[str] = None
     attachmentName: Optional[str] = None
 
@@ -73,40 +74,35 @@ DEEPSEEK_MODELS = {
 }
 SELECTED_MODEL = "deepseek-chat"
 
-# ✅ NEW: Pydantic models with email validation
 class SignupRequest(BaseModel):
-    email: EmailStr  # ✅ Built-in email validation
+    email: EmailStr
     password: str
 
 class LoginRequest(BaseModel):
-    email: EmailStr  # ✅ Built-in email validation
+    email: EmailStr
     password: str
 
 class ChatRequest(BaseModel):
     message: str
     session_token: str
-    session_id: str | None = None   # ✅ Allows frontend to continue same session
+    session_id: str | None = None
 
 class ChatResponse(BaseModel):
     reply: str
     session_id: str
 
 
-
-# ✅ NEW: Helper function to validate email format (additional server-side check)
 def is_valid_email(email: str) -> bool:
     """Validate email format using regex"""
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return re.match(pattern, email) is not None
 
 
-# ✅ NEW: Helper function to generate session token
 def generate_session_token() -> str:
     """Generate a secure random session token"""
     return secrets.token_urlsafe(32)
 
 
-# ✅ NEW: Helper function to validate session token
 def validate_session(session_token: str) -> int | None:
     """Validate session token and return user_id if valid"""
     if not session_token:
@@ -155,11 +151,11 @@ def save_chat_session_if_new(session_id: str, user_id: int, title: str = None):
         # Check if session already exists
         cur.execute("SELECT session_id FROM chat_sessions WHERE session_id = %s", (session_id,))
         if not cur.fetchone():
-            # Insert new session
+            # ✅ FIX: Insert with NULL title instead of hardcoded "New Conversation"
             cur.execute("""
                 INSERT INTO chat_sessions (session_id, user_id, title, created_at)
                 VALUES (%s, %s, %s, NOW())
-            """, (session_id, user_id, title or "New Conversation"))
+            """, (session_id, user_id, None))
             conn.commit()
     except Exception as e:
         print(f"⚠️ Failed to save chat session: {e}")
@@ -168,6 +164,41 @@ def save_chat_session_if_new(session_id: str, user_id: int, title: str = None):
     finally:
         if cur: cur.close()
         if conn: return_connection(conn)
+
+
+# ✅ NEW FUNCTION: Auto-update session title from first user message
+def update_session_title_if_empty(session_id: str, user_message: str):
+    """
+    Updates the session title to the first user message if title is NULL.
+    """
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        
+        # Check if title is NULL
+        cur.execute("SELECT title FROM chat_sessions WHERE session_id = %s", (session_id,))
+        result = cur.fetchone()
+        
+        if result and result[0] is None:
+            # Extract first 40 chars as title
+            title = user_message[:40].strip()
+            cur.execute("""
+                UPDATE chat_sessions 
+                SET title = %s 
+                WHERE session_id = %s
+            """, (title, session_id))
+            conn.commit()
+            print(f"✅ Session title auto-generated: {title}")
+    except Exception as e:
+        print(f"⚠️ Failed to update session title: {e}")
+        if conn and not conn.closed:
+            conn.rollback()
+    finally:
+        if cur: cur.close()
+        if conn: return_connection(conn)
+
 
 def save_chat_to_db(session_id: str, user_id: int, user_message: str, ai_reply: str):
     conn = None
@@ -188,19 +219,18 @@ def save_chat_to_db(session_id: str, user_id: int, user_message: str, ai_reply: 
         if cur: cur.close()
         if conn: return_connection(conn)
 
+
 # ===============================
-# 🔹 SIGNUP ENDPOINT (Fixed)
+# 🔹 SIGNUP ENDPOINT
 # ===============================
 @app.post("/signup")
 async def signup(request: SignupRequest):
-    email = request.email.strip().lower()  # ✅ Normalize email
+    email = request.email.strip().lower()
     password = request.password
 
-    # ✅ Additional email validation
     if not is_valid_email(email):
         raise HTTPException(status_code=400, detail="Invalid email format")
     
-    # ✅ Password strength check
     if len(password) < 6:
         raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
 
@@ -210,12 +240,10 @@ async def signup(request: SignupRequest):
         conn = get_connection()
         cur = conn.cursor()
         
-        # Check if user already exists
         cur.execute("SELECT * FROM users WHERE email=%s", (email,))
         if cur.fetchone():
             raise HTTPException(status_code=400, detail="Email already registered")
 
-        # ✅ Hash password before storing
         hashed_password = hash_password(password)
         
         cur.execute(
@@ -249,14 +277,13 @@ async def signup(request: SignupRequest):
 
 
 # ===============================
-# 🔹 LOGIN ENDPOINT (Fixed)
+# 🔹 LOGIN ENDPOINT
 # ===============================
 @app.post("/login")
 async def login(request: LoginRequest):
-    email = request.email.strip().lower()  # ✅ Normalize email
+    email = request.email.strip().lower()
     password = request.password
 
-    # ✅ Additional email validation
     if not is_valid_email(email):
         raise HTTPException(status_code=400, detail="Invalid email format")
 
@@ -266,7 +293,6 @@ async def login(request: LoginRequest):
         conn = get_connection()
         cur = conn.cursor()
         
-        # Get user with hashed password
         cur.execute("SELECT id, email, password FROM users WHERE email=%s", (email,))
         user = cur.fetchone()
 
@@ -275,15 +301,12 @@ async def login(request: LoginRequest):
         
         user_id, user_email, hashed_password = user
         
-        # ✅ Verify password using bcrypt
         if not verify_password(password, hashed_password):
             raise HTTPException(status_code=401, detail="Invalid email or password")
         
-        # ✅ Generate session token
         session_token = generate_session_token()
-        expires_at = datetime.now() + timedelta(days=7)  # 7-day session
+        expires_at = datetime.now() + timedelta(days=7)
         
-        # ✅ Store session in database
         cur.execute("""
             INSERT INTO user_sessions (user_id, session_token, expires_at)
             VALUES (%s, %s, %s)
@@ -294,7 +317,7 @@ async def login(request: LoginRequest):
             "message": "Login successful ✅",
             "email": user_email,
             "user_id": user_id,
-            "session_token": session_token  # ✅ Return session token to client
+            "session_token": session_token
         }
     except HTTPException:
         raise
@@ -320,18 +343,16 @@ async def login(request: LoginRequest):
 
 
 # ===============================
-# 🔹 LOGOUT ENDPOINT (NEW)
+# 🔹 LOGOUT ENDPOINT
 # ===============================
 @app.post("/logout")
 async def logout(session_token: str = Header(None, alias="Authorization")):
     """
     Logout endpoint - invalidates the user's session token
-    Expects: Authorization header with session token
     """
     if not session_token:
         raise HTTPException(status_code=400, detail="Session token required")
     
-    # Remove "Bearer " prefix if present
     if session_token.startswith("Bearer "):
         session_token = session_token[7:]
     
@@ -341,7 +362,6 @@ async def logout(session_token: str = Header(None, alias="Authorization")):
         conn = get_connection()
         cur = conn.cursor()
         
-        # ✅ Invalidate session in database
         cur.execute("""
             UPDATE user_sessions 
             SET is_active = FALSE 
@@ -378,7 +398,7 @@ async def logout(session_token: str = Header(None, alias="Authorization")):
 
 
 # ===============================
-# 🤖 CHAT ENDPOINTS (Fixed)
+# 🤖 CHAT ENDPOINT
 # ===============================
 @app.post("/chat", response_model=ChatResponse)
 async def chat_endpoint(request: ChatRequest):
@@ -393,11 +413,14 @@ async def chat_endpoint(request: ChatRequest):
     # Generate new chat session if none was provided
     session_id = request.session_id or generate_chat_session_id()
 
-    # Call AI API
-    response = await call_deepseek_api(user_message, SELECTED_MODEL)
-
     # Save session if it doesn't exist
     save_chat_session_if_new(session_id, user_id)
+    
+    # ✅ FIX: Auto-update title from first user message
+    update_session_title_if_empty(session_id, user_message)
+
+    # Call AI API
+    response = await call_deepseek_api(user_message, SELECTED_MODEL)
 
     # Save chat message
     save_chat_to_db(session_id, user_id, user_message, response)
@@ -412,7 +435,7 @@ async def call_deepseek_api(message: str, model: str) -> str:
         "model": model,
         "messages": [
             {"role": "system", "content": "You are a helpful AI assistant for students."},
-            {"role": "user", "content": message}  # ✅ FIXED: Added missing quote
+            {"role": "user", "content": message}
         ],
         "temperature": 0.7,
         "max_tokens": 500
@@ -442,18 +465,14 @@ async def health_check():
     return {"status": "healthy", "api_provider": "DeepSeek", "model": SELECTED_MODEL}
 
 
-
-
 @app.get("/chat/sessions")
 async def get_chat_sessions(Authorization: str = Header(None)):
     if not Authorization:
         raise HTTPException(status_code=401, detail="Missing Authorization header")
 
-    # Remove Bearer prefix
     if Authorization.startswith("Bearer "):
         Authorization = Authorization[7:]
 
-    # Validate session token
     user_id = validate_session(Authorization)
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid or expired session")
@@ -464,7 +483,6 @@ async def get_chat_sessions(Authorization: str = Header(None)):
         conn = get_connection()
         cur = conn.cursor()
 
-        # Get user's chat sessions
         cur.execute("""
             SELECT session_id, title, created_at
             FROM chat_sessions
@@ -476,7 +494,6 @@ async def get_chat_sessions(Authorization: str = Header(None)):
         result = []
 
         for session_id, title, created_at in sessions:
-            # Fetch chat messages
             cur.execute("""
                 SELECT user_message, ai_reply, timestamp
                 FROM chat_history
@@ -488,14 +505,20 @@ async def get_chat_sessions(Authorization: str = Header(None)):
             messages = []
             for row in rows:
                 user_msg, ai_msg, ts = row
-                # Add user message
                 messages.append({"sender": "user", "content": user_msg, "timestamp": ts.isoformat()})
-                # Add AI reply
                 messages.append({"sender": "ai", "content": ai_msg, "timestamp": ts.isoformat()})
+
+            # ✅ FIX: Auto-generate title if missing
+            if not title and messages:
+                first_user_msg = next((m for m in messages if m["sender"] == "user"), None)
+                if first_user_msg:
+                    title = first_user_msg["content"][:40]
+                else:
+                    title = "New Conversation"
 
             result.append({
                 "id": session_id,
-                "title": title,
+                "title": title or "New Conversation",
                 "messages": messages,
                 "endedAt": messages[-1]["timestamp"] if messages else created_at.isoformat(),
                 "tags": []
@@ -507,6 +530,7 @@ async def get_chat_sessions(Authorization: str = Header(None)):
         if cur: cur.close()
         if conn: return_connection(conn)
 
+
 @app.post("/chat/sessions/{session_id}/clear")
 async def clear_chat_session(
     session_id: str,
@@ -515,7 +539,6 @@ async def clear_chat_session(
     if not Authorization:
         raise HTTPException(status_code=401, detail="Missing Authorization header")
 
-    # Remove Bearer prefix
     if Authorization.startswith("Bearer "):
         Authorization = Authorization[7:]
 
@@ -529,7 +552,6 @@ async def clear_chat_session(
         conn = get_connection()
         cur = conn.cursor()
 
-        # Verify session belongs to user
         cur.execute(
             "SELECT session_id FROM chat_sessions WHERE session_id=%s AND user_id=%s",
             (session_id, user_id)
@@ -537,7 +559,6 @@ async def clear_chat_session(
         if not cur.fetchone():
             raise HTTPException(status_code=404, detail="Session not found")
 
-        # ✅ Delete only the messages
         cur.execute(
             "DELETE FROM chat_history WHERE session_id=%s AND user_id=%s",
             (session_id, str(user_id))
@@ -554,9 +575,7 @@ async def clear_chat_session(
         if cur: cur.close()
         if conn: return_connection(conn)
 
-# ===============================
-# 🔹 DELETE CHAT SESSION (for deleting full conversation thread)
-# ===============================
+
 @app.delete("/chat/sessions/{session_id}")
 async def delete_chat_session(
     session_id: str,
@@ -565,7 +584,6 @@ async def delete_chat_session(
     if not Authorization:
         raise HTTPException(status_code=401, detail="Missing Authorization header")
 
-    # Remove Bearer prefix if present
     if Authorization.startswith("Bearer "):
         Authorization = Authorization[7:]
 
@@ -579,7 +597,6 @@ async def delete_chat_session(
         conn = get_connection()
         cur = conn.cursor()
 
-        # Verify that session belongs to this user
         cur.execute(
             "SELECT session_id FROM chat_sessions WHERE session_id = %s AND user_id::text = %s",
             (session_id, str(user_id))
@@ -587,10 +604,7 @@ async def delete_chat_session(
         if not cur.fetchone():
             raise HTTPException(status_code=404, detail="Session not found")
 
-        # Delete chat history first
         cur.execute("DELETE FROM chat_history WHERE session_id = %s AND user_id::text = %s", (session_id, str(user_id)))
-
-        # Delete the session itself
         cur.execute("DELETE FROM chat_sessions WHERE session_id = %s AND user_id::text = %s", (session_id, str(user_id)))
 
         conn.commit()
@@ -599,25 +613,22 @@ async def delete_chat_session(
     except Exception as e:
         if conn and not conn.closed:
             conn.rollback()
-        print(f"❌ Failed to delete chat session: {type(e).__name__}: {e}")  # 👈 shows exact error type and message
-        raise HTTPException(status_code=500, detail=str(e))  # 👈 send real cause to frontend for now
+        print(f"❌ Failed to delete chat session: {type(e).__name__}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
     
     finally:
         if cur: cur.close()
         if conn: return_connection(conn)
-# ===============================
-# 🔹 CREATE NEW CHAT SESSION (Fully DB-backed)
-# ===============================
+
+
 @app.post("/chat/new-session", response_model=dict)
 async def new_chat_session(Authorization: str = Header(None)):
     """
     Creates a new chat session in the database for the logged-in user.
-    Returns the session_id to the frontend.
     """
     if not Authorization:
         raise HTTPException(status_code=401, detail="Missing Authorization header")
 
-    # Remove Bearer prefix if present
     if Authorization.startswith("Bearer "):
         Authorization = Authorization[7:]
 
@@ -625,10 +636,8 @@ async def new_chat_session(Authorization: str = Header(None)):
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid or expired session")
 
-    # Generate a new session ID
     session_id = generate_chat_session_id()
 
-    # Save session in DB
     try:
         save_chat_session_if_new(session_id, user_id)
     except Exception as e:
@@ -637,16 +646,13 @@ async def new_chat_session(Authorization: str = Header(None)):
 
     return {"session_id": session_id, "message": "New chat session created ✅"}
 
-# ------------------------
-# Batch chat endpoint
-# ------------------------
+
 @app.post("/chat/batch")
 async def chat_batch_endpoint(request: BatchChatRequest):
     user_id = validate_session(request.session_token)
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid or expired session")
 
-    # Ensure session exists
     save_chat_session_if_new(request.session_id, user_id)
 
     if not request.messages:
@@ -658,7 +664,6 @@ async def chat_batch_endpoint(request: BatchChatRequest):
         conn = get_connection()
         cur = conn.cursor()
         for msg in request.messages:
-            # Determine user_message and ai_reply based on sender
             user_msg = msg.message if msg.sender == "user" else ""
             ai_msg = msg.message if msg.sender == "ai" else ""
             
@@ -679,11 +684,8 @@ async def chat_batch_endpoint(request: BatchChatRequest):
     finally:
         if cur: cur.close()
         if conn: return_connection(conn)
-        
-from fastapi import Path, Header, HTTPException
 
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
