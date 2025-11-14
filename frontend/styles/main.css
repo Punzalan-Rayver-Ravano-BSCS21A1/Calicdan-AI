@@ -91,15 +91,34 @@ body {
     padding: 0 1.5rem;
 }
 
-/* Sidebar */
+/* Sidebar default hidden */
 .sidebar {
     width: 16rem;
     background-color: var(--sidebar-background);
     border-right: 1px solid var(--sidebar-border);
     display: flex;
     flex-direction: column;
+    position: fixed;      /* fix on left */
+    top: 0;
+    left: -16rem;         /* hidden off-screen */
+    height: 100vh;
+    z-index: 1000;
+    transition: left 0.3s ease;
 }
 
+/* When sidebar is visible */
+.sidebar.open {
+    left: 0;
+}
+/* Sidebar toggle button inside sidebar */
+.sidebar .sidebar-toggle {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
 .sidebar-content {
     padding: 1rem;
 }
@@ -1736,4 +1755,64 @@ html[data-theme="dark"] .auth-box input {
     border-radius: var(--radius);
     border: 1px solid var(--border);
     font-size: 1rem;
+}
+
+/* Side Panel Button */
+.side-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    background-color: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem; /* slightly rounder */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0.25rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* subtle shadow */
+}
+
+.side-panel:hover {
+    background-color: var(--accent);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15); /* hover pop */
+}
+
+.side-panel img {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease, filter 0.3s ease;
+    filter: invert(70%) sepia(20%) saturate(50%) hue-rotate(160deg); /* teal-ish */
+}
+
+.side-panel:hover img {
+    transform: rotate(90deg) scale(1.1); /* slightly larger on hover */
+    filter: invert(80%) sepia(25%) saturate(60%) hue-rotate(160deg);
+}
+
+/* Active/open state */
+.side-panel.active {
+    background-color: var(--accent);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* Sidebar Toggle Button (inside sidebar) */
+.sidebar-toggle {
+    top: 0.5rem; /* tweak until visually aligned */
+    transform: translateY(3%); /* optional for fine tuning */
+}
+
+
+.sidebar-toggle img {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease, filter 0.3s ease;
+    filter: invert(70%) sepia(20%) saturate(50%) hue-rotate(160deg);
+}
+
+
+
+.sidebar-toggle.active {
+    background-color: var(--accent);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
