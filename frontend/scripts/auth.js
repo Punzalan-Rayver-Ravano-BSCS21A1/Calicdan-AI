@@ -113,6 +113,10 @@ async function handleGoogleCallback(response) {
   try {
     const idToken = response.credential;
 
+    // 🔍 DEBUG HERE — Immediately after getting the token
+    console.log("ID Token Length:", idToken?.length);
+    console.log("ID Token:", idToken);
+
     // Show loading notification
     if (window.AppUtils && window.AppUtils.showNotification) {
       window.AppUtils.showNotification("Signing in with Google...", "info");
@@ -163,6 +167,7 @@ async function handleGoogleCallback(response) {
     }
   }
 }
+
 
 // ========================================
 // LOGOUT FUNCTION (Enhanced with Google)
