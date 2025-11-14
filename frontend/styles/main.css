@@ -162,19 +162,19 @@ body {
 }
 
 .logo {
-  width: 2rem;
-  height: 2rem;
-  border-radius: var(--radius);
-  overflow: hidden; /* Ensures image stays inside */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: none; /* remove colored background */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--radius);
+    overflow: hidden; /* keeps the logo within the box */
+    background: none; /* remove primary background color */
 }
 .logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* makes the logo fill the box */
 }
 
 
