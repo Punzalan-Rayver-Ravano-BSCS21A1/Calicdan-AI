@@ -20,8 +20,8 @@ let settings = {
     },
 };
 
-// Mock API key for demonstration
-let apiKey = 'sk_live_1234567890abcdefghijklmnopqrstuvwxyz';
+// API key - should be fetched from secure backend
+let apiKey = '';
 let isApiKeyVisible = false;
 
 document.addEventListener('DOMContentLoaded', function() {

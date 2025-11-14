@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
@@ -100,7 +99,16 @@
                     </div>
                 </div>
             </header>
-            
+
+            <!-- Top Navigation -->
+            <nav class="top-nav">
+                <a href="index.html" class="tab-item">Landing (Desktop)</a>
+                <a href="chat.html" class="tab-item">Chat (Desktop)</a>
+                <a href="history.html" class="tab-item">History</a>
+                <a href="settings.html" class="tab-item active">Settings</a>
+                <a href="customer-service.html" class="tab-item">Customer Service</a>
+            </nav>
+
             <!-- Settings Page Content -->
             <main class="settings-page">
                 <div class="container">
@@ -340,7 +348,8 @@
                                                     type="password" 
                                                     id="apiKeyInput" 
                                                     class="api-key-input" 
-                                                    value="sk_live_1234567890abcdefghijklmnopqrstuvwxyz"
+                                                    value=""
+                                                    placeholder="No API key set"
                                                     readonly
                                                 />
                                                 <button class="api-key-btn" id="toggleKeyVisibility" title="Toggle visibility">
