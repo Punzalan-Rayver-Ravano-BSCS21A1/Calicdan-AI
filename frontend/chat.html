@@ -36,6 +36,14 @@
   <div class="app-container">
     <!-- Sidebar -->
     <aside class="sidebar">
+    <!-- Sidebar Toggle Button -->
+      <button class="sidebar-toggle">
+        <img 
+            src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIxLjc1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXBhbmVsLWxlZnQtaWNvbiBsdWNpZGUtcGFuZWwtbGVmdCI+PHJlY3Qgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiB4PSIzIiB5PSIzIiByeD0iMiIvPjxwYXRoIGQ9Ik05IDN2MTgiLz48L3N2Zz4=" 
+            alt="Menu Icon"
+            style="width: 20px; height: 20px;"
+        />
+      </button>
       <div class="sidebar-content">
         <h2 class="sidebar-label">Navigation</h2>
         <nav class="sidebar-nav">
@@ -52,8 +60,17 @@
     <div class="main-content">
       <header class="header">
         <div class="header-left">
-          <div class="logo"><i data-lucide="message-square"></i></div>
-          <h1 class="header-title">Legend of Calicdan</h1>
+          <button class="side-panel">
+            <img 
+              src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIxLjc1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXBhbmVsLWxlZnQtaWNvbiBsdWNpZGUtcGFuZWwtbGVmdCI+PHJlY3Qgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiB4PSIzIiB5PSIzIiByeD0iMiIvPjxwYXRoIGQ9Ik05IDN2MTgiLz48L3N2Zz4=" 
+              alt="Menu Icon"
+              style="width: 20px; height: 20px;"
+            />
+          </button>
+                <div class="logo">
+        <img src="public/CalicdanLogo.png" alt="Calicdan Logo" class="site-logo">
+      </div>
+          <h1 class="header-title">Calicdan AI</h1>
         </div>
         <div class="header-right">
           <div class="user-dropdown" style="position: relative;">
@@ -214,5 +231,23 @@ document.addEventListener("DOMContentLoaded", () => {
    ✅ GOOGLE OAUTH HANDLER - NEW CODE ENDS HERE
    --------------------------------------------------------------------- */
 </script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Sidebar toggle logic
+    const sidebar = document.querySelector('.sidebar');
+    const headerToggle = document.querySelector('.header-left .side-panel'); // header button
+    const sidebarToggle = document.querySelector('.sidebar .sidebar-toggle'); // sidebar button
+
+    function toggleSidebar() {
+      sidebar.classList.toggle('open');
+    }
+
+    // Open sidebar from header button
+    if (headerToggle) headerToggle.addEventListener('click', toggleSidebar);
+
+    // Close sidebar from sidebar button
+    if (sidebarToggle) sidebarToggle.addEventListener('click', toggleSidebar);
+  });
+  </script>
 </body>
 </html>
