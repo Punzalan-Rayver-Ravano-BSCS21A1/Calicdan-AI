@@ -98,13 +98,14 @@ body {
     border-right: 1px solid var(--sidebar-border);
     display: flex;
     flex-direction: column;
-    position: relative;      /* ← CHANGE TO RELATIVE */
+    position: sticky;
     top: 0;
-    left: 0;
-    height: auto;           /* ← CHANGE THIS */
-    z-index: 1000;
+    height: 100vh;
+    z-index: 99;
     transition: width 0.3s ease;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.1);
 }
+
 .sidebar {
     width: 0;
     overflow: hidden;
@@ -175,6 +176,10 @@ body {
     padding: 1rem 1.5rem;
     border-bottom: 1px solid var(--border);
     background-color: var(--card);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .header-left {
@@ -639,13 +644,15 @@ body {
 }
 
 .message-bubble {
-    max-width: min(68ch, 80vw);
+    max-width: min(75ch, 95vw);
     display: flex;
     flex-direction: column;
     gap: 6px;
     border-radius: 18px;
-    padding: 10px 12px;
+    padding: 12px 16px;
     box-shadow: var(--shadow-soft);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .message.assistant-message .message-bubble {
@@ -2155,10 +2162,11 @@ html[data-theme="dark"] .auth-box button.btn-google:hover {
 
 /* Sidebar Toggle Button (inside sidebar) */
 .sidebar-toggle {
-    top: 0.5rem; /* tweak until visually aligned */
-    transform: translateY(3%); /* optional for fine tuning */
+    top: 0.5rem;
+    transform: translateY(3%);
+    background: transparent !important;
+    border: none;
 }
-
 
 .sidebar-toggle img {
     width: 20px;
@@ -2168,6 +2176,6 @@ html[data-theme="dark"] .auth-box button.btn-google:hover {
 }
 
 .sidebar-toggle.active {
-    background-color: var(--accent);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    background-color: transparent !important;
+    box-shadow: none;
 }
