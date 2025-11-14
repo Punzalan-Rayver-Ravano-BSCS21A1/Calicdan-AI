@@ -318,12 +318,40 @@ function loadSettings() {
         desktopNotificationsToggle.checked = settings.notifications.desktop;
     }
     
-    // Load account info
+    // ✅ FIX: Load account info properly
     const accountEmail = document.getElementById('accountEmail');
-    if (accountEmail && window.AuthModule) {
-        const session = window.AuthModule.getSession();
-        if (session && session.email) {
-            accountEmail.textContent = session.email;
+    if (accountEmail) {
+        if (window.AuthModule && typeof window.AuthModule.getSession === 'function') {
+            const session = window.AuthModule.getSession();
+            if (session && session.email) {
+                accountEmail.textContent = session.email;
+            } else {
+                // Fallback: check localStorage directly
+                const sessionRaw = localStorage.getItem('calicdan-session');
+                if (sessionRaw) {
+                    try {
+                        const sessionData = JSON.parse(sessionRaw);
+                        if (sessionData.email) {
+                            accountEmail.textContent = sessionData.email;
+                        }
+                    } catch (e) {
+                        accountEmail.textContent = 'Unable to load email';
+                    }
+                }
+            }
+        } else {
+            // If AuthModule not available, get from localStorage
+            const sessionRaw = localStorage.getItem('calicdan-session');
+            if (sessionRaw) {
+                try {
+                    const sessionData = JSON.parse(sessionRaw);
+                    if (sessionData.email) {
+                        accountEmail.textContent = sessionData.email;
+                    }
+                } catch (e) {
+                    console.error('Failed to parse session:', e);
+                }
+            }
         }
     }
 }
