@@ -500,7 +500,7 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .chat-header {
@@ -727,6 +727,10 @@ body {
     padding: 1rem 1.5rem;
     border-top: 1px solid var(--border);
     background-color: var(--card);
+    position: sticky;
+    bottom: 0;
+    z-index: 100;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
 }
 
 .input-container {
