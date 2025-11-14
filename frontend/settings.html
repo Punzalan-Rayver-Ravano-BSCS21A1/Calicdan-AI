@@ -1,37 +1,37 @@
+
 <!DOCTYPE html>
-<html lang="en">
-    <html lang="en" data-theme="light"></html>
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="public/CalicdanLogo.png">
-      <!-- No-flash theme bootstrap (apply theme + background BEFORE first paint) -->
-  <meta name="color-scheme" content="light dark">
-  <script>
-  (function () {
-    try {
-      // Prefer per-user settings if logged in
-      var sessionRaw = localStorage.getItem('calicdan-session');
-      var userId = null;
-      try { userId = sessionRaw ? JSON.parse(sessionRaw).user_id : null; } catch (e) {}
-      var perUserKey = userId ? ('calicdan-settings_user_' + userId) : null;
-      var raw = (perUserKey && localStorage.getItem(perUserKey)) || localStorage.getItem('calicdan-settings') || '{}';
-      var cfg = JSON.parse(raw);
-      var choice = (cfg.appearance && cfg.appearance.theme) || 'light'; // 'light' | 'dark' | 'system'
-      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      var resolved = (choice === 'system') ? (prefersDark ? 'dark' : 'light') : choice;
+    <!-- No-flash theme bootstrap (apply theme + background BEFORE first paint) -->
+    <meta name="color-scheme" content="light dark">
+    <script>
+    (function () {
+        try {
+            // Prefer per-user settings if logged in
+            var sessionRaw = localStorage.getItem('calicdan-session');
+            var userId = null;
+            try { userId = sessionRaw ? JSON.parse(sessionRaw).user_id : null; } catch (e) {}
+            var perUserKey = userId ? ('calicdan-settings_user_' + userId) : null;
+            var raw = (perUserKey && localStorage.getItem(perUserKey)) || localStorage.getItem('calicdan-settings') || '{}';
+            var cfg = JSON.parse(raw);
+            var choice = (cfg.appearance && cfg.appearance.theme) || 'light'; // 'light' | 'dark' | 'system'
+            var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            var resolved = (choice === 'system') ? (prefersDark ? 'dark' : 'light') : choice;
 
-      // Apply theme immediately
-      document.documentElement.setAttribute('data-theme', resolved);
+            // Apply theme immediately
+            document.documentElement.setAttribute('data-theme', resolved);
 
-      // Inline BG to prevent white flash
-      var bg = (resolved === 'dark') ? 'hsl(225, 28%, 7%)' : '#ffffff';
-      var style = document.createElement('style');
-      style.textContent = 'html,body{background:'+ bg +';}';
-      document.head.appendChild(style);
-    } catch (e) {}
-  })();
-  </script>
+            // Inline BG to prevent white flash
+            var bg = (resolved === 'dark') ? 'hsl(225, 28%, 7%)' : '#ffffff';
+            var style = document.createElement('style');
+            style.textContent = 'html,body{background:'+ bg +';}';
+            document.head.appendChild(style);
+        } catch (e) {}
+    })();
+    </script>
     <title>Settings - Legend of Calicdan</title>
     <link rel="stylesheet" href="styles/theme.css">
     <link rel="stylesheet" href="styles/main.css">
@@ -81,18 +81,18 @@
                 </div>
                 
                 <div class="header-right">
-                    <!-- ✅ User dropdown menu -->
+                    <!-- User dropdown menu -->
                     <div class="user-dropdown" style="position: relative;">
                         <button class="user-menu" id="userMenuButton" style="cursor: pointer; display: flex; align-items: center; gap: 8px; background: none; border: none; padding: 8px;">
                             <div class="user-avatar">U</div>
                             <i data-lucide="chevron-down"></i>
                         </button>
                         <!-- Dropdown content -->
-                        <div id="userDropdownMenu" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 8px; background: var(--bg-primary, #fff); border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 180px; z-index: 1000;">
-                            <div style="padding: 12px; border-bottom: 1px solid #eee;">
-                                <p id="userEmail" style="margin: 0; font-size: 13px; color: #666; font-weight: 500;"></p>
+                        <div id="userDropdownMenu" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 8px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 180px; z-index: 1000;">
+                            <div style="padding: 12px; border-bottom: 1px solid var(--border);">
+                                <p id="userEmail" style="margin: 0; font-size: 13px; color: var(--muted-foreground); font-weight: 500;"></p>
                             </div>
-                            <button id="logoutButton" style="width: 100%; padding: 12px; text-align: left; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; color: #e33; font-weight: 500; transition: background 0.2s;">
+                            <button id="logoutButton" style="width: 100%; padding: 12px; text-align: left; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; color: var(--destructive); font-weight: 500; transition: background 0.2s;">
                                 <i data-lucide="log-out" style="width: 16px; height: 16px;"></i>
                                 Logout
                             </button>
@@ -105,10 +105,13 @@
             <main class="settings-page">
                 <div class="container">
                     <header class="page-header">
-                        <h1 class="page-title">Settings</h1>
+                        <div>
+                            <h1 class="page-title">Settings</h1>
+                            <p class="page-subtitle">Manage your account settings and preferences</p>
+                        </div>
                         <div class="page-actions">
-                            <button class="btn btn-outline">Reset</button>
-                            <button class="btn btn-primary">Save changes</button>
+                            <button class="btn btn-outline" id="resetBtn">Reset</button>
+                            <button class="btn btn-primary" id="saveBtn">Save changes</button>
                         </div>
                     </header>
 
@@ -117,28 +120,38 @@
                         <aside class="settings-sidebar">
                             <nav class="settings-nav">
                                 <button class="settings-nav-item active" data-category="appearance">
-                                    <i data-lucide="palette"></i>
-                                    Appearance
+                                    <div class="nav-content">
+                                        <i data-lucide="palette"></i>
+                                        <span>Appearance</span>
+                                    </div>
                                     <i data-lucide="chevron-right"></i>
                                 </button>
                                 <button class="settings-nav-item" data-category="account">
-                                    <i data-lucide="user"></i>
-                                    Account
+                                    <div class="nav-content">
+                                        <i data-lucide="user"></i>
+                                        <span>Account</span>
+                                    </div>
                                     <i data-lucide="chevron-right"></i>
                                 </button>
                                 <button class="settings-nav-item" data-category="privacy">
-                                    <i data-lucide="shield"></i>
-                                    Privacy
+                                    <div class="nav-content">
+                                        <i data-lucide="shield"></i>
+                                        <span>Privacy</span>
+                                    </div>
                                     <i data-lucide="chevron-right"></i>
                                 </button>
                                 <button class="settings-nav-item" data-category="notifications">
-                                    <i data-lucide="bell"></i>
-                                    Notifications
+                                    <div class="nav-content">
+                                        <i data-lucide="bell"></i>
+                                        <span>Notifications</span>
+                                    </div>
                                     <i data-lucide="chevron-right"></i>
                                 </button>
                                 <button class="settings-nav-item" data-category="api">
-                                    <i data-lucide="key"></i>
-                                    API & Keys
+                                    <div class="nav-content">
+                                        <i data-lucide="key"></i>
+                                        <span>API & Keys</span>
+                                    </div>
                                     <i data-lucide="chevron-right"></i>
                                 </button>
                             </nav>
@@ -150,10 +163,11 @@
                             <div class="settings-panel active" id="appearance">
                                 <div class="settings-section">
                                     <h2 class="section-title">Theme</h2>
+                                    <p class="section-description">Customize the visual appearance of the application</p>
                                     
                                     <div class="setting-item">
                                         <div class="setting-label">
-                                            <label>Appearance</label>
+                                            <label for="themeSelect">Appearance</label>
                                             <p>Switch between Light and Dark modes for the entire app.</p>
                                         </div>
                                         <select class="form-select" id="themeSelect">
@@ -165,7 +179,7 @@
 
                                     <div class="setting-item">
                                         <div class="setting-label">
-                                            <label>High Contrast</label>
+                                            <label for="highContrast">High Contrast</label>
                                             <p>Increase contrast for improved readability.</p>
                                         </div>
                                         <label class="switch">
@@ -177,10 +191,11 @@
 
                                 <div class="settings-section">
                                     <h2 class="section-title">Chat Preferences</h2>
+                                    <p class="section-description">Adjust how conversations are displayed</p>
                                     
                                     <div class="setting-item">
                                         <div class="setting-label">
-                                            <label>Message Density</label>
+                                            <label for="messageDensity">Message Density</label>
                                             <p>Choose how compact messages appear in chat.</p>
                                         </div>
                                         <select class="form-select" id="messageDensity">
@@ -192,7 +207,7 @@
 
                                     <div class="setting-item">
                                         <div class="setting-label">
-                                            <label>Show Timestamps</label>
+                                            <label for="showTimestamps">Show Timestamps</label>
                                             <p>Display time next to each message in conversations.</p>
                                         </div>
                                         <label class="switch">
@@ -203,35 +218,63 @@
                                 </div>
                             </div>
 
+                            <!-- Account Settings -->
+                            <div class="settings-panel" id="account">
+                                <div class="settings-section">
+                                    <h2 class="section-title">Account Information</h2>
+                                    <p class="section-description">View and manage your account details</p>
+                                    
+                                    <div class="account-info-card">
+                                        <div class="info-row">
+                                            <span class="info-label">Email Address</span>
+                                            <span class="info-value" id="accountEmail">user@example.com</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label">Account Status</span>
+                                            <span class="info-value status-badge">Active</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label">Member Since</span>
+                                            <span class="info-value" id="accountCreated">January 2024</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Privacy Settings -->
                             <div class="settings-panel" id="privacy">
                                 <div class="settings-section">
                                     <h2 class="section-title">Data & Privacy</h2>
+                                    <p class="section-description">Control your data and privacy settings</p>
                                     
                                     <div class="privacy-card">
                                         <div class="privacy-item">
-                                            <p class="privacy-title">Clear Chat History</p>
-                                            <button class="btn btn-destructive btn-sm">
+                                            <div class="privacy-content">
+                                                <p class="privacy-title">Clear Chat History</p>
+                                                <p class="privacy-description">
+                                                    Permanently remove all your past chats from this device. This action cannot be undone.
+                                                </p>
+                                            </div>
+                                            <button class="btn btn-destructive btn-sm" id="clearHistoryBtn">
                                                 <i data-lucide="trash-2"></i>
                                                 Clear
                                             </button>
                                         </div>
-                                        <p class="privacy-description">
-                                            Permanently remove all your past chats from this device.
-                                        </p>
                                     </div>
 
                                     <div class="privacy-card">
                                         <div class="privacy-item">
-                                            <p class="privacy-title">Export Data</p>
-                                            <button class="btn btn-outline btn-sm">
+                                            <div class="privacy-content">
+                                                <p class="privacy-title">Export Data</p>
+                                                <p class="privacy-description">
+                                                    Download your messages and settings as a JSON file for backup purposes.
+                                                </p>
+                                            </div>
+                                            <button class="btn btn-outline btn-sm" id="exportDataBtn">
                                                 <i data-lucide="download"></i>
                                                 Export
                                             </button>
                                         </div>
-                                        <p class="privacy-description">
-                                            Download your messages as a JSON file.
-                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -240,10 +283,11 @@
                             <div class="settings-panel" id="notifications">
                                 <div class="settings-section">
                                     <h2 class="section-title">Notifications</h2>
+                                    <p class="section-description">Manage how you receive notifications</p>
                                     
                                     <div class="setting-item">
                                         <div class="setting-label">
-                                            <label>Email Notifications</label>
+                                            <label for="emailNotifications">Email Notifications</label>
                                             <p>Receive email updates about important events.</p>
                                         </div>
                                         <label class="switch">
@@ -254,7 +298,7 @@
 
                                     <div class="setting-item">
                                         <div class="setting-label">
-                                            <label>Push Notifications</label>
+                                            <label for="pushNotifications">Push Notifications</label>
                                             <p>Get push notifications on your mobile device.</p>
                                         </div>
                                         <label class="switch">
@@ -265,7 +309,7 @@
 
                                     <div class="setting-item">
                                         <div class="setting-label">
-                                            <label>Desktop Notifications</label>
+                                            <label for="desktopNotifications">Desktop Notifications</label>
                                             <p>Show notifications on your desktop when the app is open.</p>
                                         </div>
                                         <label class="switch">
@@ -276,23 +320,62 @@
                                 </div>
                             </div>
 
-                            <!-- Account Settings -->
-                            <div class="settings-panel" id="account">
-                                <div class="settings-section">
-                                    <h2 class="section-title">Account Information</h2>
-                                    <p class="section-description">
-                                        Manage your account settings and preferences.
-                                    </p>
-                                </div>
-                            </div>
-
                             <!-- API Settings -->
                             <div class="settings-panel" id="api">
                                 <div class="settings-section">
                                     <h2 class="section-title">API & Keys</h2>
-                                    <p class="section-description">
-                                        Manage API keys and integrations.
-                                    </p>
+                                    <p class="section-description">Manage your API keys and integrations</p>
+                                    
+                                    <div class="api-key-card">
+                                        <div class="api-key-header">
+                                            <div>
+                                                <h3 class="api-key-title">Your API Key</h3>
+                                                <p class="api-key-description">Use this key to authenticate API requests. Keep it secure and never share it publicly.</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="api-key-display">
+                                            <div class="api-key-input-wrapper">
+                                                <input 
+                                                    type="password" 
+                                                    id="apiKeyInput" 
+                                                    class="api-key-input" 
+                                                    value="sk_live_1234567890abcdefghijklmnopqrstuvwxyz"
+                                                    readonly
+                                                />
+                                                <button class="api-key-btn" id="toggleKeyVisibility" title="Toggle visibility">
+                                                    <i data-lucide="eye"></i>
+                                                </button>
+                                            </div>
+                                            
+                                            <div class="api-key-actions">
+                                                <button class="btn btn-outline btn-sm" id="copyKeyBtn">
+                                                    <i data-lucide="copy"></i>
+                                                    Copy
+                                                </button>
+                                                <button class="btn btn-outline btn-sm" id="regenerateKeyBtn">
+                                                    <i data-lucide="refresh-cw"></i>
+                                                    Regenerate
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="api-key-warning">
+                                            <i data-lucide="alert-triangle"></i>
+                                            <span>Regenerating your API key will invalidate the old one. Update your applications accordingly.</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="api-info-card">
+                                        <h3 class="api-info-title">API Documentation</h3>
+                                        <p class="api-info-description">
+                                            Learn how to integrate with our API and explore available endpoints.
+                                        </p>
+                                        <a href="#" class="btn btn-outline btn-sm">
+                                            <i data-lucide="book-open"></i>
+                                            View Docs
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
 
@@ -319,38 +402,38 @@
     <script>
     // Dropdown logic for this page
     document.addEventListener('DOMContentLoaded', function() {
-      const userMenuButton = document.getElementById('userMenuButton');
-      const userDropdownMenu = document.getElementById('userDropdownMenu');
-      const logoutButton = document.getElementById('logoutButton');
-      const userEmailDisplay = document.getElementById('userEmail');
+        const userMenuButton = document.getElementById('userMenuButton');
+        const userDropdownMenu = document.getElementById('userDropdownMenu');
+        const logoutButton = document.getElementById('logoutButton');
+        const userEmailDisplay = document.getElementById('userEmail');
 
-      if (window.AuthModule) {
-        const session = window.AuthModule.getSession();
-        if (session && session.email && userEmailDisplay) {
-          userEmailDisplay.textContent = session.email;
+        if (window.AuthModule) {
+            const session = window.AuthModule.getSession();
+            if (session && session.email && userEmailDisplay) {
+                userEmailDisplay.textContent = session.email;
+            }
         }
-      }
 
-      if (userMenuButton) {
-        userMenuButton.addEventListener('click', function(e) {
-          e.stopPropagation();
-          const isVisible = userDropdownMenu.style.display === 'block';
-          userDropdownMenu.style.display = isVisible ? 'none' : 'block';
-          if (typeof lucide !== 'undefined') { try { lucide.createIcons(); } catch{} }
-        });
-      }
-
-      document.addEventListener('click', function(e) {
-        if (userDropdownMenu && userMenuButton && !userMenuButton.contains(e.target) && !userDropdownMenu.contains(e.target)) {
-          userDropdownMenu.style.display = 'none';
+        if (userMenuButton) {
+            userMenuButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const isVisible = userDropdownMenu.style.display === 'block';
+                userDropdownMenu.style.display = isVisible ? 'none' : 'block';
+                if (typeof lucide !== 'undefined') { try { lucide.createIcons(); } catch{} }
+            });
         }
-      });
 
-      if (logoutButton) {
-        logoutButton.addEventListener('click', function() {
-          if (window.AuthModule) window.AuthModule.handleLogout();
+        document.addEventListener('click', function(e) {
+            if (userDropdownMenu && userMenuButton && !userMenuButton.contains(e.target) && !userDropdownMenu.contains(e.target)) {
+                userDropdownMenu.style.display = 'none';
+            }
         });
-      }
+
+        if (logoutButton) {
+            logoutButton.addEventListener('click', function() {
+                if (window.AuthModule) window.AuthModule.handleLogout();
+            });
+        }
     });
     </script>
 </body>
