@@ -98,17 +98,20 @@ body {
     border-right: 1px solid var(--sidebar-border);
     display: flex;
     flex-direction: column;
-    position: fixed;      /* fix on left */
+    position: relative;      /* ← CHANGE TO RELATIVE */
     top: 0;
-    left: -16rem;         /* hidden off-screen */
-    height: 100vh;
+    left: 0;
+    height: auto;           /* ← CHANGE THIS */
     z-index: 1000;
-    transition: left 0.3s ease;
+    transition: width 0.3s ease;
 }
-
+.sidebar {
+    width: 0;
+    overflow: hidden;
+}
 /* When sidebar is visible */
 .sidebar.open {
-    left: 0;
+    width: 16rem;
 }
 /* Sidebar toggle button inside sidebar */
 .sidebar .sidebar-toggle {
