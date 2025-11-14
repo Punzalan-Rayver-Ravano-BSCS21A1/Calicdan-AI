@@ -1,0 +1,6 @@
+Powershell Commands:
+
+First step: go to the directory of your project folder
+Command Example - cd Calicdan-AI
+
+2nd step: 
